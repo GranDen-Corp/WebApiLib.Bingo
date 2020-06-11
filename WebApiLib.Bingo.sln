@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GranDen.Game.ApiLib.Bingo", "GranDen.Game.ApiLib.Bingo\GranDen.Game.ApiLib.Bingo.csproj", "{1B9FF66A-D498-4DD1-9E27-B8AA5A0E3DAE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GranDen.Game.ApiLib.Bingo", "src\GranDen.Game.ApiLib.Bingo\GranDen.Game.ApiLib.Bingo.csproj", "{1B9FF66A-D498-4DD1-9E27-B8AA5A0E3DAE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
