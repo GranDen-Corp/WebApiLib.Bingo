@@ -9,8 +9,13 @@ namespace GranDen.Game.ApiLib.Bingo.Models
     {
         [Key]
         public int Id { get; set; }
-        
+       
+        [Required]
         public MarkPoint2D MarkPoint { get; set; }
+       
+        public Bingo2dGameInfo BelongingGame { get; set; }
+
+        public BingoPlayerInfo BelongingPlayer { get; set; }
         
         public PointProjection PointProjection { get; set; }
 
