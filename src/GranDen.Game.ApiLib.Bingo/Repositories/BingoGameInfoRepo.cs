@@ -11,9 +11,9 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
     public class BingoGameInfoRepo : IBingoGameInfoRepo
     {
         private readonly BingoGameDbContext _bingoGameDbContext;
-        private readonly IOptions<BingoGameOption> _optionDelegate;
+        private readonly IOptionsMonitor<BingoGameOption> _optionDelegate;
 
-        public BingoGameInfoRepo(BingoGameDbContext bingoGameDbContext, IOptions<BingoGameOption> optionDelegate)
+        public BingoGameInfoRepo(BingoGameDbContext bingoGameDbContext, IOptionsMonitor<BingoGameOption> optionDelegate)
         {
             _bingoGameDbContext = bingoGameDbContext;
             _optionDelegate = optionDelegate;
@@ -29,7 +29,7 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
                 throw new Exception($"Bingo Game {bingoGameInfoDto.GameName} already exist.");
             }
 
-            var bingoGameSetting = _optionDelegate.Value.First(g => g.GameName == bingoGameInfoDto.GameName);
+            var bingoGameSetting = _optionDelegate.CurrentValue.First(g => g.GameName == bingoGameInfoDto.GameName);
 
             var newBingoGame = new Bingo2dGameInfo(bingoGameInfoDto.GameName, bingoGameSetting.Width, bingoGameSetting.Height, bingoGameInfoDto.StartTime, bingoGameInfoDto.EndTime);
             _bingoGameDbContext.Bingo2dGameInfos.Add(newBingoGame);
