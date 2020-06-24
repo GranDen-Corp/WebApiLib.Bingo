@@ -4,25 +4,25 @@ namespace GranDen.Game.ApiLib.Bingo.Test
 {
     public class BingoPlayerApiTest
     {
-        [Fact]
+        [Fact(Skip = "TBD")]
         public void PlayerShouldBeAbleToJoinNonExpiredGame()
         {
             
         }
 
-        [Fact]
+        [Fact(Skip = "TBD")]
         public void PlayerCanAddRecordDuringValidGamePeriod()
         {
             
         }
 
-        [Fact]
+        [Fact(Skip = "TBD")]
         public void PlayerShouldNotAddRecordsAfterGameExpired()
         {
             
         }
 
-        [Fact]
+        [Fact(Skip = "TBD")]
         public void PlayerCanGetBingoRecordsAfterGameExpired()
         {
             
