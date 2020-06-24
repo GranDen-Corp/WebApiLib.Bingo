@@ -3,6 +3,7 @@ using GranDen.Game.ApiLib.Bingo.Models;
 using GranDen.Game.ApiLib.Bingo.Repositories;
 using GranDen.Game.ApiLib.Bingo.Repositories.Interfaces;
 using GranDen.Game.ApiLib.Bingo.Services;
+using GranDen.Game.ApiLib.Bingo.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 

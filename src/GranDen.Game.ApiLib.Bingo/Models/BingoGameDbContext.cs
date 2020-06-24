@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using GranDen.GameLib.Bingo;
+using Microsoft.EntityFrameworkCore;
 
 namespace GranDen.Game.ApiLib.Bingo.Models
 {
@@ -34,7 +35,12 @@ namespace GranDen.Game.ApiLib.Bingo.Models
 
                 b.HasOne(e => e.BelongingPlayer);
 
-                b.Property(e => e.MarkPoint).HasConversion(MarkPoint2DValueEfCoreUtil.GetMarkPoint2DValueConverter());
+                b.OwnsOne(x => x.MarkPoint, m =>
+                {
+                    m.Property(p => p.X).IsRequired().HasColumnName(nameof(MarkPoint2D.X));
+                    m.Property(p => p.Y).IsRequired().HasColumnName(nameof(MarkPoint2D.Y));
+                    m.Property(p => p.Marked).HasColumnName(nameof(MarkPoint2D.Marked));
+                });
             });
 
             modelBuilder.Entity<PointProjection>().HasOne(p => p.MappingGeoPoint);

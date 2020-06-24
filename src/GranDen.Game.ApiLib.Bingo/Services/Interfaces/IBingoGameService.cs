@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using GranDen.Game.ApiLib.Bingo.DTO;
 using GranDen.GameLib.Bingo;
 
-namespace GranDen.Game.ApiLib.Bingo.Services
+namespace GranDen.Game.ApiLib.Bingo.Services.Interfaces
 {
     public interface IBingoGameService<T>
     {

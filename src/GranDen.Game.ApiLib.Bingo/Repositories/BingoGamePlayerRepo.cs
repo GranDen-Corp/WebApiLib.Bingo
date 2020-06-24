@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using GranDen.Game.ApiLib.Bingo.Models;
 using GranDen.Game.ApiLib.Bingo.Repositories.Interfaces;
@@ -33,12 +32,14 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
         }
 
         public BingoPlayerInfo InitBingoGamePlayerData(string bingoGameName, string bingoPlayerId,
-            IDictionary<(int x, int y), string> geoPointIds)
+            GeoPointIdInitializeDelegate geoPointIdInitiator)
         {
             var bingoGame = _bingoGameInfoRepo.GetByName(bingoGameName);
 
             var bingoPlayer = new BingoPlayerInfo {PlayerId = bingoPlayerId};
             bingoPlayer.JoinedGames.Add(bingoGame);
+
+            var geoPointIds = geoPointIdInitiator(bingoGameName, bingoPlayerId);
 
             for (var x = 0; x < bingoGame.MaxWidth; x++)
             {

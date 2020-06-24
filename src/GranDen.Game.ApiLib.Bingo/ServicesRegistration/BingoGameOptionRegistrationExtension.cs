@@ -1,8 +1,6 @@
-﻿using System;
-using GranDen.Game.ApiLib.Bingo.Options;
+﻿using GranDen.Game.ApiLib.Bingo.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
 {

@@ -10,7 +10,6 @@ namespace GranDen.Game.ApiLib.Bingo.Models
         [Key]
         public int Id { get; set; }
        
-        [Required]
         public MarkPoint2D MarkPoint { get; set; }
        
         public Bingo2dGameInfo BelongingGame { get; set; }
@@ -20,16 +19,5 @@ namespace GranDen.Game.ApiLib.Bingo.Models
         public PointProjection PointProjection { get; set; }
 
         public DateTimeOffset? ClearTime { get; set; }
-    }
-
-    public static class MarkPoint2DValueEfCoreUtil
-    {
-        public static ValueConverter<MarkPoint2D, string> GetMarkPoint2DValueConverter()
-        {
-            return new ValueConverter<MarkPoint2D, string>(
-                toDb => $"{toDb.X}, {toDb.Y} | {toDb.Marked}",
-                toEf => new MarkPoint2D(toEf)
-                );
-        }
     }
 }

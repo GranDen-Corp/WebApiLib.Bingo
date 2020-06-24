@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using GranDen.Game.ApiLib.Bingo.Models;
 using GranDen.Game.ApiLib.Bingo.Repositories.Interfaces;
@@ -28,12 +29,32 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
             }
 
             mappingGeoPoint = new MappingGeoPoint {GeoPointId = geoPointId};
-
             _bingoGameDbContext.MappingGeoPoints.Add(mappingGeoPoint);
             var updateCount = _bingoGameDbContext.SaveChanges();
 
             return updateCount >= 1;
         }
+
+        public bool CreateMappingGeoPoints(IEnumerable<string> geoPointIds)
+        {
+            foreach (var geoPointId in geoPointIds)
+            {
+                var mappingGeoPoint =
+                    _bingoGameDbContext.MappingGeoPoints.FirstOrDefault(p => p.GeoPointId == geoPointId);
+
+                if (mappingGeoPoint != null)
+                {
+                    continue;
+                }
+
+                mappingGeoPoint = new MappingGeoPoint {GeoPointId = geoPointId};
+                _bingoGameDbContext.MappingGeoPoints.Add(mappingGeoPoint);
+            }
+
+            _bingoGameDbContext.SaveChanges();
+            return true;
+        }
+
 
         public bool UpdateRedirection(string geoPointId, string redirectGeoPointId)
         {

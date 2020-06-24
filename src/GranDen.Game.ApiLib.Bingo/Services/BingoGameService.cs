@@ -5,6 +5,7 @@ using GranDen.Game.ApiLib.Bingo.DTO;
 using GranDen.Game.ApiLib.Bingo.Models;
 using GranDen.Game.ApiLib.Bingo.Options;
 using GranDen.Game.ApiLib.Bingo.Repositories.Interfaces;
+using GranDen.Game.ApiLib.Bingo.Services.Interfaces;
 using GranDen.GameLib.Bingo;
 using Microsoft.Extensions.Options;
 
@@ -16,17 +17,20 @@ namespace GranDen.Game.ApiLib.Bingo.Services
         private readonly IBingoGameInfoRepo _bingoGameInfoRepo;
         private readonly IBingoGamePlayerRepo _bingoGamePlayerRepo;
         private readonly IBingoPointRepo _bingoPointRepo;
+        private readonly IGeoPointIdProvider _geoPointIdProvider;
         private readonly IOptionsMonitor<BingoGameOption> _bingoGameOptionDelegate;
         private readonly IOptionsMonitor<BingoGameTableOption> _bingoGameTableOptionDelegate;
 
         public BingoGameService(BingoGameDbContext bingoGameDbContext,
             IBingoGameInfoRepo bingoGameInfoRepo, IBingoGamePlayerRepo bingoGamePlayerRepo, IBingoPointRepo bingoPointRepo, 
+            IGeoPointIdProvider geoPointIdProvider,
             IOptionsMonitor<BingoGameOption> bingoGameOptionDelegate, IOptionsMonitor<BingoGameTableOption> bingoGameTableOptionDelegate)
         {
             _bingoGameDbContext = bingoGameDbContext;
             _bingoGameInfoRepo = bingoGameInfoRepo;
             _bingoGamePlayerRepo = bingoGamePlayerRepo;
             _bingoPointRepo = bingoPointRepo;
+            _geoPointIdProvider = geoPointIdProvider;
             _bingoGameOptionDelegate = bingoGameOptionDelegate;
             _bingoGameTableOptionDelegate = bingoGameTableOptionDelegate;
         }
@@ -64,24 +68,15 @@ namespace GranDen.Game.ApiLib.Bingo.Services
                 return false;
             }
 
-            var player = _bingoGamePlayerRepo.GetBingoGamePlayer(playerId).FirstOrDefault();
-            if (player == null)
-            {
-                player = new BingoPlayerInfo{ PlayerId = playerId};
-                _bingoGameDbContext.BingoPlayerInfos.Add(player);
-            }
-            player.JoinedGames.Add(game);
-            game.JoinedPlayers.Add(player);
+            var player = _bingoGamePlayerRepo.GetBingoGamePlayer(playerId).FirstOrDefault() ?? _bingoGamePlayerRepo.InitBingoGamePlayerData(gameName, playerId, _geoPointIdProvider.GeoPointIdInitializer);
 
-            var updateCount = _bingoGameDbContext.SaveChanges();
-
-            return updateCount > 0;
+            return player.JoinedGames.Any(g => g.GameName == gameName);
         }
 
         public bool MarkBingoPoint(string gameName, string playerId, (int x, int y) point)
         {
             var (x, y) = point;
-            var bingoPoint = _bingoPointRepo.QueryBingoPoints(gameName, playerId)
+            var bingoPoint = _bingoPointRepo.QueryBingoPoints(gameName, playerId).ToList()
                 .FirstOrDefault(p => p.MarkPoint.X == x && p.MarkPoint.Y == y);
 
             if (bingoPoint == null)
