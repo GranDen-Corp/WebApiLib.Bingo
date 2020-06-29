@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using GranDen.GameLib.Bingo;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace GranDen.Game.ApiLib.Bingo.Models
 {

@@ -67,7 +67,6 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             var bingoGameInfoRepo = _serviceProvider.GetService<IBingoGameInfoRepo>();
 
             var bingoGameService = _serviceProvider.GetService<IBingoGameService<string>>();
-            var bingoPlayerRepo = _serviceProvider.GetService<IBingoGamePlayerRepo>();
 
             bingoGameInfoRepo.CreateBingoGame(new BingoGameInfoDto
                 {GameName = BingoGameName, I18nDisplayKey = "ui_key1", StartTime = DateTimeOffset.UtcNow});
@@ -75,9 +74,9 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             Assert.True(bingoGameService.JoinGame(BingoGameName, TestPlayerId));
             
             //Act
-            var marked0 = bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (0, 0));
-            var marked1 = bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (0, 1));
-            var marked2 = bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (0, 2));
+            var marked0 = bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, new BingoPointDto { X = 0, Y = 0 });
+            var marked1 = bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, new BingoPointDto { X = 0, Y = 1 });
+            var marked2 = bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, new BingoPointDto { X = 0, Y = 2 });
 
             //Assert
             Assert.True(marked0);
@@ -130,16 +129,16 @@ namespace GranDen.Game.ApiLib.Bingo.Test
                 {GameName = BingoGameName, I18nDisplayKey = "ui_key1", StartTime = DateTimeOffset.UtcNow});
 
             Assert.True(bingoGameService.JoinGame(BingoGameName, TestPlayerId));
-            Assert.True(bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (0, 0)));
-            Assert.True(bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (1, 0)));
-            Assert.True(bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (2, 0)));
-            Assert.True(bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (3, 0)));
-            Assert.True(bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (0, 1)));
-            Assert.True(bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (0, 2)));
-            Assert.True(bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (0, 3)));
-            Assert.True(bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (1, 1)));
-            Assert.True(bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (2, 2)));
-            Assert.True(bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (3, 3)));
+            Assert.True(bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (0, 0), DateTimeOffset.UtcNow));
+            Assert.True(bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (1, 0), DateTimeOffset.UtcNow));
+            Assert.True(bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (2, 0), DateTimeOffset.UtcNow));
+            Assert.True(bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (3, 0), DateTimeOffset.UtcNow));
+            Assert.True(bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (0, 1), DateTimeOffset.UtcNow));
+            Assert.True(bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (0, 2), DateTimeOffset.UtcNow));
+            Assert.True(bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (0, 3), DateTimeOffset.UtcNow));
+            Assert.True(bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (1, 1), DateTimeOffset.UtcNow));
+            Assert.True(bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (2, 2), DateTimeOffset.UtcNow));
+            Assert.True(bingoGameService.MarkBingoPoint(BingoGameName, TestPlayerId, (3, 3), DateTimeOffset.UtcNow));
             
             //Act
             var achievedPrizes = bingoGameService.GetAchievedBingoPrizes(BingoGameName, TestPlayerId);

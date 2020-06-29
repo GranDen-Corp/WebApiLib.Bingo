@@ -7,6 +7,6 @@ namespace GranDen.Game.ApiLib.Bingo.DTO
         public int X { get; set; }
         public int Y { get; set; }
         public string GeoPointId { get; set; }
-        public DateTimeOffset? ClearTime { get; set; }
+        public DateTimeOffset ClearTime { get; set; } = DateTimeOffset.UtcNow;
     }
 }

@@ -11,7 +11,9 @@ namespace GranDen.Game.ApiLib.Bingo.Services.Interfaces
 
         bool JoinGame(string gameName, string playerId);
 
-        bool MarkBingoPoint(string gameName, string playerId, (int x, int y) point);
+        bool MarkBingoPoint(string gameName, string playerId, (int x, int y) point, DateTimeOffset markedTime);
+
+        bool MarkBingoPoint(string gameName, string playerId, BingoPointDto bingoPointDto);
 
         ICollection<MarkPoint2D> GetPlayerBingoPointStatus(string gameName, string playerId);
 

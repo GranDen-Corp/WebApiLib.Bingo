@@ -73,7 +73,7 @@ namespace GranDen.Game.ApiLib.Bingo.Services
             return player.JoinedGames.Any(g => g.GameName == gameName);
         }
 
-        public bool MarkBingoPoint(string gameName, string playerId, (int x, int y) point)
+        public bool MarkBingoPoint(string gameName, string playerId, (int x, int y) point, DateTimeOffset markedTime)
         {
             var (x, y) = point;
             var bingoPoint = _bingoPointRepo.QueryBingoPoints(gameName, playerId).ToList()
@@ -90,10 +90,15 @@ namespace GranDen.Game.ApiLib.Bingo.Services
             }
 
             bingoPoint.MarkPoint.Marked = true;
-            bingoPoint.ClearTime = DateTimeOffset.UtcNow;
+            bingoPoint.ClearTime = markedTime;
             var updateCount = _bingoGameDbContext.SaveChanges();
 
             return updateCount > 0;
+        }
+
+        public bool MarkBingoPoint(string gameName, string playerId, BingoPointDto bingoPointDto)
+        {
+            return MarkBingoPoint(gameName, playerId, (bingoPointDto.X, bingoPointDto.Y), bingoPointDto.ClearTime);
         }
 
         public ICollection<MarkPoint2D> GetPlayerBingoPointStatus(string gameName, string playerId)
