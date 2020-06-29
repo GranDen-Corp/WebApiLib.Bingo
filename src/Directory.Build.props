@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <Version Condition=" '$(Version)'=='' ">0.0.1</Version>
+    <PackageReleaseNotes>0.0.1 : 
+      &#xD;&#xA;Initial release
+      &#xD;&#xA;
+    </PackageReleaseNotes>
+  </PropertyGroup>
+</Project>

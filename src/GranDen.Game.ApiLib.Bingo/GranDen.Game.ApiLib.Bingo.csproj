@@ -2,14 +2,32 @@
 
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <Title>Bingo Game Library</Title>
+        <Copyright>Copyright (c) 2020 GranDen Corp.(狂點軟體開發)</Copyright>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/GranDen-Corp/WebApiLib.Bingo</PackageProjectUrl>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <RepositoryUrl>https://github.com/GranDen-Corp/WebApiLib.Bingo.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <PackageTags>game-lib, bingo, entity-framework-core</PackageTags>
+        <Company>GranDen Inc.</Company>
+        <Authors>Isak Pao</Authors>
+        <Description>Bingo Game Backend Library</Description>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="GranDen.GameLib.Bingo" Version="1.0.3" />
+        <PackageReference Include="GranDen.GameLib.Bingo" Version="1.0.5" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.5" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="3.1.5" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.5" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.5" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.5" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.5" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.5" />
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.5" />
+        <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="3.1.5" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
     </ItemGroup>
 
 </Project>

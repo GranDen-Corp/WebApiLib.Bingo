@@ -10,9 +10,6 @@ namespace GranDen.Game.ApiLib.Bingo.Models
         [Column(TypeName = "varchar(128)")]
         public string PlayerId { get; set; }
         
-        public BingoGameInfo BingoGame { get; set; }
-        
-        public ICollection<BingoPoint> BingoPoints { get; } = new List<BingoPoint>();
-        
+        public ICollection<Bingo2dGameInfo> JoinedGames { get; } = new List<Bingo2dGameInfo>();
     }
 }

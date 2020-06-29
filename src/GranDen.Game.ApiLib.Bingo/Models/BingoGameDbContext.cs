@@ -1,27 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using GranDen.GameLib.Bingo;
 using Microsoft.EntityFrameworkCore;
 
 namespace GranDen.Game.ApiLib.Bingo.Models
 {
-    public class BingoDbContext : DbContext
+    public class BingoGameDbContext : DbContext
     {
-        public BingoDbContext(DbContextOptions<BingoDbContext> options) : base(options)
+        public BingoGameDbContext(DbContextOptions<BingoGameDbContext> options) : base(options)
         {
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<BingoGameInfo>(g =>
+            modelBuilder.Entity<Bingo2dGameInfo>(g =>
             {
+                g.HasIndex(p => p.GameName).IsUnique();
+                g.Property(b => b.MaxWidth);
+                g.Property(b => b.MaxHeight);
                 g.HasMany(p => p.JoinedPlayers);
+                g.HasMany(e => e.BingoPoints);
             });
 
             modelBuilder.Entity<BingoPlayerInfo>(p =>
             {
-                p.HasMany(e => e.BingoPoints);
-                p.HasOne(e => e.BingoGame);
+                p.HasMany(e => e.JoinedGames);
             });
 
             modelBuilder.Entity<BingoPoint>(b =>
@@ -30,7 +31,16 @@ namespace GranDen.Game.ApiLib.Bingo.Models
                     .WithOne(p => p.BingoPoint)
                     .HasForeignKey<PointProjection>(p => p.BingoPointFk);
 
-                b.Property(e => e.MarkPoint).HasConversion(MarkPoint2DValueEfCoreUtil.GetMarkPoint2DValueConverter());
+                b.HasOne(e => e.BelongingGame);
+
+                b.HasOne(e => e.BelongingPlayer);
+
+                b.OwnsOne(x => x.MarkPoint, m =>
+                {
+                    m.Property(p => p.X).IsRequired().HasColumnName(nameof(MarkPoint2D.X));
+                    m.Property(p => p.Y).IsRequired().HasColumnName(nameof(MarkPoint2D.Y));
+                    m.Property(p => p.Marked).HasColumnName(nameof(MarkPoint2D.Marked));
+                });
             });
 
             modelBuilder.Entity<PointProjection>().HasOne(p => p.MappingGeoPoint);
@@ -38,7 +48,7 @@ namespace GranDen.Game.ApiLib.Bingo.Models
             modelBuilder.Entity<MappingGeoPoint>().HasIndex(m => m.GeoPointId).IsUnique();
         }
 
-        public DbSet<BingoGameInfo> BingoGameInfos { get; set; }
+        public DbSet<Bingo2dGameInfo> Bingo2dGameInfos { get; set; }
         public DbSet<BingoPlayerInfo> BingoPlayerInfos { get; set; }
         public DbSet<BingoPoint> BingoPoints { get; set; }
         public DbSet<MappingGeoPoint> MappingGeoPoints { get; set; }
