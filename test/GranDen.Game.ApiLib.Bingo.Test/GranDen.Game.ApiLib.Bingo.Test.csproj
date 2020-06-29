@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
         <IsPackable>false</IsPackable>
-        <UseSourceLink>true</UseSourceLink>
+        <UseSourceLink>false</UseSourceLink>
         <CoverletOutputFormat>cobertura</CoverletOutputFormat>
         <CoverletOutput>TestResult/Coverage/</CoverletOutput>
         <CollectCoverage>false</CollectCoverage>
