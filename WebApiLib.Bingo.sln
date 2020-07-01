@@ -1,12 +1,20 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GranDen.Game.ApiLib.Bingo", "src\GranDen.Game.ApiLib.Bingo\GranDen.Game.ApiLib.Bingo.csproj", "{1B9FF66A-D498-4DD1-9E27-B8AA5A0E3DAE}"
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30225.117
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GranDen.Game.ApiLib.Bingo", "src\GranDen.Game.ApiLib.Bingo\GranDen.Game.ApiLib.Bingo.csproj", "{1B9FF66A-D498-4DD1-9E27-B8AA5A0E3DAE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{FD9DB4C8-4C20-46A2-AE59-E6EA58004B87}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{C191EC8D-1EE6-4553-B003-5953B3AFCD10}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GranDen.Game.ApiLib.Bingo.Test", "test\GranDen.Game.ApiLib.Bingo.Test\GranDen.Game.ApiLib.Bingo.Test.csproj", "{A464BC7F-6274-41F0-B9CD-BEB76C37E9D5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GranDen.Game.ApiLib.Bingo.Test", "test\GranDen.Game.ApiLib.Bingo.Test\GranDen.Game.ApiLib.Bingo.Test.csproj", "{A464BC7F-6274-41F0-B9CD-BEB76C37E9D5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{71CC297E-B1F2-4B34-B629-A1AB2E610DA1}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,8 +31,14 @@ Global
 		{A464BC7F-6274-41F0-B9CD-BEB76C37E9D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A464BC7F-6274-41F0-B9CD-BEB76C37E9D5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{1B9FF66A-D498-4DD1-9E27-B8AA5A0E3DAE} = {FD9DB4C8-4C20-46A2-AE59-E6EA58004B87}
 		{A464BC7F-6274-41F0-B9CD-BEB76C37E9D5} = {C191EC8D-1EE6-4553-B003-5953B3AFCD10}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E8187784-D061-41B6-BB62-7A2E03EA9CC0}
 	EndGlobalSection
 EndGlobal

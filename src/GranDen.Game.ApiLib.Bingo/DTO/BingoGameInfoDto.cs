@@ -2,6 +2,9 @@
 
 namespace GranDen.Game.ApiLib.Bingo.DTO
 {
+    /// <summary>
+    /// DTO object
+    /// </summary>
     public class BingoGameInfoDto
     {
         public string GameName { get; set; }
