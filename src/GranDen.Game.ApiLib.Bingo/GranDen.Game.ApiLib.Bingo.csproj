@@ -27,7 +27,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <None Remove="GranDen.GameLib.Randomizer.xml" />
+      <None Remove="GranDen.Game.ApiLib.Bingo.xml" />
     </ItemGroup>
 
     <ItemGroup>
