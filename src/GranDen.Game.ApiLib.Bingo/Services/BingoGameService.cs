@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 
 namespace GranDen.Game.ApiLib.Bingo.Services
 {
+    /// <inheritdoc />
     public class BingoGameService : IBingoGameService<string>
     {
         private readonly BingoGameDbContext _bingoGameDbContext;
@@ -21,6 +22,16 @@ namespace GranDen.Game.ApiLib.Bingo.Services
         private readonly IOptionsMonitor<BingoGameOption> _bingoGameOptionDelegate;
         private readonly IOptionsMonitor<BingoGameTableOption> _bingoGameTableOptionDelegate;
 
+        /// <summary>
+        /// Class constructor
+        /// </summary>
+        /// <param name="bingoGameDbContext"></param>
+        /// <param name="bingoGameInfoRepo"></param>
+        /// <param name="bingoGamePlayerRepo"></param>
+        /// <param name="bingoPointRepo"></param>
+        /// <param name="geoPointIdProvider"></param>
+        /// <param name="bingoGameOptionDelegate"></param>
+        /// <param name="bingoGameTableOptionDelegate"></param>
         public BingoGameService(BingoGameDbContext bingoGameDbContext,
             IBingoGameInfoRepo bingoGameInfoRepo, IBingoGamePlayerRepo bingoGamePlayerRepo, IBingoPointRepo bingoPointRepo, 
             IGeoPointIdProvider geoPointIdProvider,
@@ -35,6 +46,7 @@ namespace GranDen.Game.ApiLib.Bingo.Services
             _bingoGameTableOptionDelegate = bingoGameTableOptionDelegate;
         }
 
+        /// <inheritdoc />
         public ICollection<BingoGameInfoDto> GetAttendableGames(DateTimeOffset current)
         {
            var games =  
@@ -46,6 +58,7 @@ namespace GranDen.Game.ApiLib.Bingo.Services
            return games;
         }
 
+        /// <inheritdoc />
         public bool JoinGame(string gameName, string playerId)
         {
             var game = _bingoGameInfoRepo.GetByName(gameName);
@@ -73,6 +86,7 @@ namespace GranDen.Game.ApiLib.Bingo.Services
             return player.JoinedGames.Any(g => g.GameName == gameName);
         }
 
+        /// <inheritdoc />
         public bool MarkBingoPoint(string gameName, string playerId, (int x, int y) point, DateTimeOffset markedTime)
         {
             var (x, y) = point;
@@ -96,16 +110,19 @@ namespace GranDen.Game.ApiLib.Bingo.Services
             return updateCount > 0;
         }
 
+        /// <inheritdoc />
         public bool MarkBingoPoint(string gameName, string playerId, BingoPointDto bingoPointDto)
         {
             return MarkBingoPoint(gameName, playerId, (bingoPointDto.X, bingoPointDto.Y), bingoPointDto.ClearTime);
         }
 
+        /// <inheritdoc />
         public ICollection<MarkPoint2D> GetPlayerBingoPointStatus(string gameName, string playerId)
         {
             return _bingoPointRepo.QueryBingoPoints(gameName, playerId).Select(b => b.MarkPoint).ToList();
         }
 
+        /// <inheritdoc />
         public ICollection<string> GetAchievedBingoPrizes(string gameName, string playerId)
         {
             var bingoGameSetting = _bingoGameOptionDelegate.CurrentValue.FirstOrDefault(g => g.GameName == gameName);

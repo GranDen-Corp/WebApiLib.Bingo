@@ -9,7 +9,7 @@ namespace GranDen.Game.ApiLib.Bingo.Options
     public class BingoGameOption : List<BingoGameSetting>
     {
     }
-    
+
     /// <summary>
     /// Single Bingo Game setting definition
     /// </summary>
@@ -20,13 +20,13 @@ namespace GranDen.Game.ApiLib.Bingo.Options
         /// </summary>
         [Required]
         public string GameName { get; set; }
-        
+
         /// <summary>
         /// Bingo Game Table key
         /// </summary>
         [Required]
         public string GameTableKey { get; set; }
-        
+
         /// <summary>
         ///  X-axis range of bingo game 
         /// </summary>

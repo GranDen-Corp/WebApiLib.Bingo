@@ -445,3 +445,4 @@ MigrationBackup/
 # End of https://www.toptal.com/developers/gitignore/api/visualstudio,visualstudiocode,rider
 
 src/GranDen.Game.ApiLib.Bingo/GranDen.Game.ApiLib.Bingo.xml
+.idea/**/riderModule.iml
