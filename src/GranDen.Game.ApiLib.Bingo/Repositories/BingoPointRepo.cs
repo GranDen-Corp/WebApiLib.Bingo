@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using GranDen.Game.ApiLib.Bingo.Models;
 using GranDen.Game.ApiLib.Bingo.Repositories.Interfaces;
@@ -6,11 +7,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GranDen.Game.ApiLib.Bingo.Repositories
 {
+    /// <inheritdoc />
     public class BingoPointRepo : IBingoPointRepo
     {
         private readonly BingoGameDbContext _bingoGameDbContext;
         private readonly IBingoGameInfoRepo _bingoGameInfoRepo;
 
+        /// <summary>
+        /// Class constructor
+        /// </summary>
+        /// <param name="bingoGameDbContext"></param>
+        /// <param name="bingoGameInfoRepo"></param>
         public BingoPointRepo(BingoGameDbContext bingoGameDbContext, IBingoGameInfoRepo bingoGameInfoRepo)
         {
             _bingoGameDbContext = bingoGameDbContext;
@@ -18,7 +25,8 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
         }
 
 
-        public BingoPoint GetMappedBingoPoint(string bingoGameName, string bingoPlayerId, string geoPointId)
+        /// <inheritdoc />
+        public IEnumerable<BingoPoint> GetMappedBingoPoint(string bingoGameName, string bingoPlayerId, string geoPointId)
         {
             var geoPoint = _bingoGameDbContext.MappingGeoPoints.AsNoTracking()
                 .Include(m => m.PointProjections).ThenInclude(p => p.BingoPoint)
@@ -27,20 +35,28 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
 
             if (geoPoint == null)
             {
-                throw new Exception($"Geo Point Id {geoPointId} not exist.");
+                throw new Exception($"Geo Point Id '{geoPointId}' not exist.");
             }
 
-            var pointProjection =
-                geoPoint.PointProjections.FirstOrDefault(p => p.BingoPlayerInfo.PlayerId == bingoPlayerId);
+            var pointProjections =
+                geoPoint.PointProjections.Where(p => p.BingoPlayerInfo.PlayerId == bingoPlayerId ).ToList();
 
-            if (pointProjection == null)
+            if (pointProjections.Count == 0)
             {
                 throw new Exception($"Point Projection not exist.");
             }
 
-            return pointProjection.BingoPoint;
+            var ret = pointProjections.Where(p => p.BingoPoint.BelongingGame.GameName == bingoGameName).Select( p => p.BingoPoint).ToList();
+
+            if (ret.Count == 0)
+            {
+                throw new Exception($"Bingo mark point(s) at Geo Point Id '{geoPointId}' that belongs to player '{bingoPlayerId}' on Bingo Game '{bingoGameName}' not exist.");
+            }
+
+            return ret;
         }
 
+        /// <inheritdoc />
         public IQueryable<BingoPoint> QueryBingoPoints(string bingoGameName, string bingoPlayerId)
         {
             var game = _bingoGameInfoRepo.QueryBingoGames().AsNoTracking().Include(g => g.JoinedPlayers)

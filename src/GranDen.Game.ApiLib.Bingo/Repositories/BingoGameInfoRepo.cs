@@ -8,17 +8,24 @@ using Microsoft.Extensions.Options;
 
 namespace GranDen.Game.ApiLib.Bingo.Repositories
 {
+    /// <inheritdoc />
     public class BingoGameInfoRepo : IBingoGameInfoRepo
     {
         private readonly BingoGameDbContext _bingoGameDbContext;
         private readonly IOptionsMonitor<BingoGameOption> _optionDelegate;
 
+        /// <summary>
+        /// Class constructor
+        /// </summary>
+        /// <param name="bingoGameDbContext"></param>
+        /// <param name="optionDelegate"></param>
         public BingoGameInfoRepo(BingoGameDbContext bingoGameDbContext, IOptionsMonitor<BingoGameOption> optionDelegate)
         {
             _bingoGameDbContext = bingoGameDbContext;
             _optionDelegate = optionDelegate;
         }
 
+        /// <inheritdoc />
         public int CreateBingoGame(BingoGameInfoDto bingoGameInfoDto)
         {
             var existedBingoGame = _bingoGameDbContext.Bingo2dGameInfos
@@ -38,6 +45,7 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
             return newBingoGame.Id;
         }
 
+        /// <inheritdoc />
         public bool UpdateBingoGame(BingoGameInfoDto bingoGameInfoDto)
         {
             var existedBingoGame = _bingoGameDbContext.Bingo2dGameInfos
@@ -58,11 +66,13 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
             return updateCount > 0;
         }
 
+        /// <inheritdoc />
         public IQueryable<Bingo2dGameInfo> QueryBingoGames()
         {
             return _bingoGameDbContext.Set<Bingo2dGameInfo>();
         }
 
+        /// <inheritdoc />
         public Bingo2dGameInfo GetByName(string gameName)
         {
             return _bingoGameDbContext.Set<Bingo2dGameInfo>().FirstOrDefault(g => g.GameName == gameName);

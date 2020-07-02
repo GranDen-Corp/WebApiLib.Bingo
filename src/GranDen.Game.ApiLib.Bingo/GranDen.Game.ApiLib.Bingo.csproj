@@ -18,6 +18,18 @@
         <Description>Bingo Game Backend Library</Description>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+      <DocumentationFile>./GranDen.Game.ApiLib.Bingo.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+      <DocumentationFile>./GranDen.Game.ApiLib.Bingo.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <None Remove="GranDen.Game.ApiLib.Bingo.xml" />
+    </ItemGroup>
+
     <ItemGroup>
         <PackageReference Include="GranDen.GameLib.Bingo" Version="1.0.5" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.5" />

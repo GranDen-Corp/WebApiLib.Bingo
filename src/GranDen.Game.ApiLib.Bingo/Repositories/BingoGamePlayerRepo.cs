@@ -7,12 +7,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GranDen.Game.ApiLib.Bingo.Repositories
 {
+    /// <inheritdoc />
     public class BingoGamePlayerRepo : IBingoGamePlayerRepo
     {
         private readonly BingoGameDbContext _bingoGameDbContext;
         private readonly IBingoGameInfoRepo _bingoGameInfoRepo;
         private readonly IBingoPointRepo _bingoPointRepo;
 
+        /// <summary>
+        /// Class constructor
+        /// </summary>
+        /// <param name="bingoGameDbContext"></param>
+        /// <param name="bingoGameInfoRepo"></param>
+        /// <param name="bingoPointRepo"></param>
         public BingoGamePlayerRepo(BingoGameDbContext bingoGameDbContext, IBingoGameInfoRepo bingoGameInfoRepo,
             IBingoPointRepo bingoPointRepo)
         {
@@ -21,16 +28,19 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
             _bingoPointRepo = bingoPointRepo;
         }
 
+        /// <inheritdoc />
         public IQueryable<BingoPlayerInfo> GetBingoGamePlayer(string bingoPlayerId)
         {
             return _bingoGameDbContext.BingoPlayerInfos.Where(p => p.PlayerId == bingoPlayerId);
         }
 
+        /// <inheritdoc />
         public IQueryable<BingoPlayerInfo> QueryBingoPlayer()
         {
             return _bingoGameDbContext.BingoPlayerInfos.AsQueryable();
         }
 
+        /// <inheritdoc />
         public BingoPlayerInfo InitBingoGamePlayerData(string bingoGameName, string bingoPlayerId,
             GeoPointIdInitializeDelegate geoPointIdInitiator)
         {
@@ -85,6 +95,7 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
             return bingoPlayer;
         }
 
+        /// <inheritdoc />
         public bool ResetBingoGamePlayerData(string bingoGameName, string bingoPlayerId)
         {
             var bingoGame = _bingoGameInfoRepo.GetByName(bingoGameName);

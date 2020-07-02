@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
 {
     /// <summary>
-    /// Extension methods to configure <c>BingoGameOption</c> & <c>BingoGameTable</c> options
+    /// Extension methods to configure <c>BingoGameOption</c> &amp; <c>BingoGameTable</c> options
     /// </summary>
     public static class BingoGameOptionRegistrationExtension
     {

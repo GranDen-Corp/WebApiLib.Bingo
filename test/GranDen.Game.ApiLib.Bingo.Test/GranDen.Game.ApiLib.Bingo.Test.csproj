@@ -3,9 +3,8 @@
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
         <IsPackable>false</IsPackable>
-        <UseSourceLink>true</UseSourceLink>
+        <UseSourceLink>false</UseSourceLink>
         <CoverletOutputFormat>cobertura</CoverletOutputFormat>
-        <Exclude>[xunit.*]*</Exclude>
         <CoverletOutput>TestResult/Coverage/</CoverletOutput>
         <CollectCoverage>false</CollectCoverage>
     </PropertyGroup>
@@ -14,7 +13,6 @@
         <Compile Remove="TestResult\**" />
         <EmbeddedResource Remove="TestResult\**" />
         <None Remove="TestResult\**" />
-        <None Remove="TestResult\Coverage\coverage.cobertura.xml" />
     </ItemGroup>
 
     <ItemGroup>

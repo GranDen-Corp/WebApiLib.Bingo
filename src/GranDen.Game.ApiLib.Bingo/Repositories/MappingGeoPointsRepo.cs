@@ -7,18 +7,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GranDen.Game.ApiLib.Bingo.Repositories
 {
+    /// <inheritdoc />
     public class MappingGeoPointsRepo : IMappingGeoPointsRepo
     {
         private readonly BingoGameDbContext _bingoGameDbContext;
         private readonly IBingoPointRepo _bingoPointRepo;
 
-        public MappingGeoPointsRepo(BingoGameDbContext bingoGameDbContext,
-            IBingoPointRepo bingoPointRepo)
+        /// <summary>
+        /// Class constructor
+        /// </summary>
+        /// <param name="bingoGameDbContext"></param>
+        /// <param name="bingoPointRepo"></param>
+        public MappingGeoPointsRepo(BingoGameDbContext bingoGameDbContext, IBingoPointRepo bingoPointRepo)
         {
             _bingoGameDbContext = bingoGameDbContext;
             _bingoPointRepo = bingoPointRepo;
         }
 
+        /// <inheritdoc />
         public bool CreateMappingGeoPoint(string geoPointId)
         {
             var mappingGeoPoint = _bingoGameDbContext.MappingGeoPoints.FirstOrDefault(p => p.GeoPointId == geoPointId);
@@ -35,6 +41,7 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
             return updateCount >= 1;
         }
 
+        /// <inheritdoc />
         public bool CreateMappingGeoPoints(IEnumerable<string> geoPointIds)
         {
             foreach (var geoPointId in geoPointIds)
@@ -55,7 +62,7 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
             return true;
         }
 
-
+        /// <inheritdoc />
         public bool UpdateRedirection(string geoPointId, string redirectGeoPointId)
         {
             var mappingGeoPoint = _bingoGameDbContext.MappingGeoPoints.FirstOrDefault(p => p.GeoPointId == geoPointId);
@@ -73,6 +80,7 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
             return updateCount >= 1;
         }
 
+        /// <inheritdoc />
         public bool AddProjection(string geoPointId, PointProjection projection)
         {
             var mappingGeoPoint = _bingoGameDbContext.MappingGeoPoints.Include(m => m.PointProjections)
@@ -90,6 +98,7 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
             return updateCount >= 1;
         }
 
+        /// <inheritdoc />
         public MappingGeoPoint GetPlayerGeoPoint(string bingoGameName, string bingoPlayerId,
             (int x, int y) bingoPointCoordinate)
         {

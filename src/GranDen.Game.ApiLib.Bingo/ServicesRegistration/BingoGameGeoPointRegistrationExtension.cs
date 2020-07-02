@@ -9,8 +9,17 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
 {
+    /// <summary>
+    /// Extension method for register Bingo Point assigner
+    /// </summary>
     public static class BingoGameGeoPointRegistrationExtension
     {
+        /// <summary>
+        /// Register a Bingo Point assigner delegate in the <c>IServiceCollection</c>
+        /// </summary>
+        /// <param name="serviceCollection"></param>
+        /// <param name="geoPointIdInitializeDelegate"></param>
+        /// <returns></returns>
         public static IServiceCollection AddGeoPointIdProvider(this IServiceCollection serviceCollection,
             GeoPointIdInitializeDelegate geoPointIdInitializeDelegate)
         {
@@ -21,6 +30,13 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
             return serviceCollection;
         }
 
+        /// <summary>
+        /// Assign a collection of preset <c>MappingGeoPoint</c> entities data
+        /// </summary>
+        /// <param name="serviceCollection"></param>
+        /// <param name="geoPointIds"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public static IServiceCollection InitGeoPointData(this IServiceCollection serviceCollection,
             IEnumerable<string> geoPointIds)
         {
