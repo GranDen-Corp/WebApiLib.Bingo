@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace GranDen.Game.ApiLib.Bingo.Options
@@ -38,5 +39,15 @@ namespace GranDen.Game.ApiLib.Bingo.Options
         /// </summary>
         [Range(1, int.MaxValue)]
         public int Height { get; set; }
+
+        /// <summary>
+        /// Bingo game start moment
+        /// </summary>
+        public DateTimeOffset? GameStart { get; set; }
+
+        /// <summary>
+        /// Bingo game end moment
+        /// </summary>
+        public DateTimeOffset? GameEnd { get; set; }
     }
 }
