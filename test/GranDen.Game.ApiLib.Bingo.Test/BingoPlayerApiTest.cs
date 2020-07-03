@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.IO;
 using System.Linq;
+using System.Text;
 using GranDen.Game.ApiLib.Bingo.DTO;
 using GranDen.Game.ApiLib.Bingo.Repositories.Interfaces;
 using GranDen.Game.ApiLib.Bingo.Services.Interfaces;
@@ -176,30 +178,41 @@ namespace GranDen.Game.ApiLib.Bingo.Test
 
         private void InitConfiguration()
         {
-            var inRamDict = new Dictionary<string, string>
-            {
-                {"BingoGame:0:GameName", "DemoGame"},
-                {"BingoGame:0:GameTableKey", "game_1"},
-                {"BingoGame:0:Width", "4"},
-                {"BingoGame:0:Height", "4"},
 
-                {"GameTable:0:GameTableKey", "game_1"},
-                {"GameTable:0:PrizeLines:0", "(0, 0), (1, 0), (2, 0), (3, 0) | 'Horizontal Line1'"},
-                {"GameTable:0:PrizeLines:1", "(0, 1), (1, 1), (2, 1), (3, 1) | 'Horizontal Line2'"},
-                {"GameTable:0:PrizeLines:2", "(0, 2), (1, 2), (2, 2), (3, 2) | 'Horizontal Line3'"},
-                {"GameTable:0:PrizeLines:3", "(0, 3), (1, 3), (2, 3), (3, 3) | 'Horizontal Line4'"},
+            const string BingoGameJsonStr = @"
+{
+    ""BingoGame"" : [
+        {
+            ""GameName"" : ""DemoGame"",
+            ""GameTableKey"" : ""game_1"",
+            ""Width"" : 4,
+            ""Height"" : 4
+        }
+    ],
+    ""GameTable"" : [
+        {
+            ""GameTableKey"" : ""game_1"",
+            ""PrizeLines"" : [
+                ""(0, 0), (1, 0), (2, 0), (3, 0) | 'Horizontal Line1'"",
+                ""(0, 1), (1, 1), (2, 1), (3, 1) | 'Horizontal Line2'"",
+                ""(0, 2), (1, 2), (2, 2), (3, 2) | 'Horizontal Line3'"",
+                ""(0, 3), (1, 3), (2, 3), (3, 3) | 'Horizontal Line4'"",
 
+                ""(0, 0), (0, 1), (0, 2), (0, 3) | 'Vertical Line1'"",
+                ""(1, 0), (1, 1), (1, 2), (1, 3) | 'Vertical Line2'"",
+                ""(2, 0), (2, 1), (2, 2), (2, 3) | 'Vertical Line3'"",
+                ""(3, 0), (3, 1), (3, 2), (3, 3) | 'Vertical Line4'"",
 
-                {"GameTable:0:PrizeLines:4", "(0, 0), (0, 1), (0, 2), (0, 3) | 'Vertical Line1'"},
-                {"GameTable:0:PrizeLines:5", "(1, 0), (1, 1), (1, 2), (1, 3) | 'Vertical Line2'"},
-                {"GameTable:0:PrizeLines:6", "(2, 0), (2, 1), (2, 2), (2, 3) | 'Vertical Line3'"},
-                {"GameTable:0:PrizeLines:7", "(3, 0), (3, 1), (3, 2), (3, 3) | 'Vertical Line4'"},
+                ""(0, 0), (1, 1), (2, 2), (3, 3) | 'Diagonal Line1'"",
+                ""(3, 0), (2, 1), (1, 2), (0, 3) | 'Diagonal Line2'""
+            ]
+        }
+    ]
+}
+";
 
-                {"GameTable:0:PrizeLines:8", "(0, 0), (1, 1), (2, 2), (3, 3) | 'Diagonal Line1'"},
-                {"GameTable:0:PrizeLines:9", "(3, 0), (2, 1), (1, 2), (0, 3) | 'Diagonal Line1'"},
-            };
-
-            _configuration = new ConfigurationBuilder().AddInMemoryCollection(inRamDict).Build();
+            using var ms = new MemoryStream(Encoding.UTF8.GetBytes(BingoGameJsonStr));
+            _configuration = new ConfigurationBuilder().AddJsonStream(ms).Build();
         }
 
         private void InitServices()
