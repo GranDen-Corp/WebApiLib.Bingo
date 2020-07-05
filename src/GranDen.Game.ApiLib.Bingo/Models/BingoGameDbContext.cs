@@ -1,4 +1,5 @@
-﻿using GranDen.GameLib.Bingo;
+﻿using GranDen.Game.ApiLib.Bingo.Models.TypeConfigurations;
+using GranDen.GameLib.Bingo;
 using Microsoft.EntityFrameworkCore;
 
 namespace GranDen.Game.ApiLib.Bingo.Models
@@ -16,41 +17,11 @@ namespace GranDen.Game.ApiLib.Bingo.Models
         /// <inheritdoc />
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Bingo2dGameInfo>(g =>
-            {
-                g.HasIndex(p => p.GameName).IsUnique();
-                g.Property(b => b.MaxWidth);
-                g.Property(b => b.MaxHeight);
-                g.HasMany(p => p.JoinedPlayers);
-                g.HasMany(e => e.BingoPoints);
-            });
-
-            modelBuilder.Entity<BingoPlayerInfo>(p =>
-            {
-                p.HasMany(e => e.JoinedGames);
-            });
-
-            modelBuilder.Entity<BingoPoint>(b =>
-            {
-                b.HasOne(p => p.PointProjection)
-                    .WithOne(p => p.BingoPoint)
-                    .HasForeignKey<PointProjection>(p => p.BingoPointFk);
-
-                b.HasOne(e => e.BelongingGame);
-
-                b.HasOne(e => e.BelongingPlayer);
-
-                b.OwnsOne(x => x.MarkPoint, m =>
-                {
-                    m.Property(p => p.X).IsRequired().HasColumnName(nameof(MarkPoint2D.X));
-                    m.Property(p => p.Y).IsRequired().HasColumnName(nameof(MarkPoint2D.Y));
-                    m.Property(p => p.Marked).HasColumnName(nameof(MarkPoint2D.Marked));
-                });
-            });
-
-            modelBuilder.Entity<PointProjection>().HasOne(p => p.MappingGeoPoint);
-
-            modelBuilder.Entity<MappingGeoPoint>().HasIndex(m => m.GeoPointId).IsUnique();
+            modelBuilder.ApplyConfiguration(new Bingo2dGameInfoConfiguration());
+            modelBuilder.ApplyConfiguration(new BingoPlayerInfoConfiguration());            
+            modelBuilder.ApplyConfiguration(new BingoPointConfiguration());
+            modelBuilder.ApplyConfiguration(new PointProjectionConfiguration());
+            modelBuilder.ApplyConfiguration(new MappingGeoPointConfiguration());
         }
 
         /// <summary>
