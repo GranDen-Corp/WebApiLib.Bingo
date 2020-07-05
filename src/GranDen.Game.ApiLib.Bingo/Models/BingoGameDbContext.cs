@@ -1,4 +1,5 @@
-﻿using GranDen.Game.ApiLib.Bingo.Models.TypeConfigurations;
+﻿using System.Reflection;
+using GranDen.Game.ApiLib.Bingo.Models.TypeConfigurations;
 using GranDen.GameLib.Bingo;
 using Microsoft.EntityFrameworkCore;
 
