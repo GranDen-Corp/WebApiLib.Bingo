@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using GranDen.Game.ApiLib.Bingo.DTO;
-using GranDen.Game.ApiLib.Bingo.Models;
 using GranDen.Game.ApiLib.Bingo.Options;
 using GranDen.Game.ApiLib.Bingo.Repositories.Interfaces;
 using GranDen.Game.ApiLib.Bingo.Services;
 using GranDen.Game.ApiLib.Bingo.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using GranDen.Game.ApiLib.Bingo.Models;
 
 namespace GranDen.Game.ApiLib.Bingo.Services.Interfaces
 {

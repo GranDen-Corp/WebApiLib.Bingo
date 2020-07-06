@@ -7,6 +7,7 @@ namespace GranDen.Game.ApiLib.Bingo.Services
     /// <inheritdoc />
     public class PresetGeoPointService : IPresetGeoPointService
     {
+        /// <inheritdoc />
         public IEnumerable<string> GeoPoints { get; set; }
     }
 }
