@@ -263,8 +263,8 @@ namespace GranDen.Game.ApiLib.Bingo.Test
                 dbContext.Database.Migrate();
             }
 
-            _serviceProvider.InitGeoPointData();
-            _serviceProvider.InitBingoGameData();
+            _serviceProvider.InitPresetGeoPointData();
+            _serviceProvider.InitPresetBingoGameData();
         }
 
         private static DbConnection CreateInMemoryDatabase()
