@@ -82,7 +82,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             var gameId = bingoGameInfoRepo.CreateBingoGame(new BingoGameInfoDto
             {
                 GameName = bingoGameName, I18nDisplayKey = "ui_key1", StartTime = DateTimeOffset.UtcNow
-            });
+            }, 4, 4);
 
             var joined = bingoGameService.JoinGame(bingoGameName, testPlayerId);
 
