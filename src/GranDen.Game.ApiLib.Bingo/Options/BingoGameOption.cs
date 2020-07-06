@@ -14,6 +14,7 @@ namespace GranDen.Game.ApiLib.Bingo.Options
     /// <summary>
     /// Single Bingo Game setting definition
     /// </summary>
+    // ReSharper disable once ClassNeverInstantiated.Global
     public class BingoGameSetting
     {
         /// <summary>
@@ -21,6 +22,11 @@ namespace GranDen.Game.ApiLib.Bingo.Options
         /// </summary>
         [Required]
         public string GameName { get; set; }
+        
+        /// <summary>
+        /// Language Display Id
+        /// </summary>
+        public string I18nKey { get; set; }
 
         /// <summary>
         /// Bingo Game Table key

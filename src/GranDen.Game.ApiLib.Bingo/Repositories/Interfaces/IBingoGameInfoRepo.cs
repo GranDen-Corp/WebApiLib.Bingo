@@ -13,8 +13,10 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories.Interfaces
         /// Create new <c>Bingo2dGameInfo</c> entity
         /// </summary>
         /// <param name="bingoGameInfoDto"></param>
+        /// <param name="maxWidth"></param>
+        /// <param name="maxHeight"></param>
         /// <returns></returns>
-        int CreateBingoGame(BingoGameInfoDto bingoGameInfoDto);
+        int CreateBingoGame(BingoGameInfoDto bingoGameInfoDto, int? maxWidth = null, int? maxHeight = null);
 
         /// <summary>
         /// Update a existing <c>Bingo2dGameInfo</c> entity
