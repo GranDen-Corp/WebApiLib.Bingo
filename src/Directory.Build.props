@@ -1,8 +1,9 @@
 <Project>
   <PropertyGroup>
-    <Version Condition=" '$(Version)'=='' ">0.0.2</Version>
-    <PackageReleaseNotes>0.0.2 : 
-      &#xD;&#xA;Add Bingo time range setting in BingoGame options
+    <Version Condition=" '$(Version)'=='' ">0.0.3</Version>
+    <PackageReleaseNotes>0.0.3 : 
+      &#xD;&#xA;1. Add bingo game preset data mechanism.
+      &#xD;&#xA;2. Modifiy existing geo point preset data methods.
       &#xD;&#xA;
     </PackageReleaseNotes>
   </PropertyGroup>
