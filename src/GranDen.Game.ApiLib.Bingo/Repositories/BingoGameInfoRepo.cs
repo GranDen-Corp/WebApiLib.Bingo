@@ -26,7 +26,7 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
         }
 
         /// <inheritdoc />
-        public int CreateBingoGame(BingoGameInfoDto bingoGameInfoDto)
+        public int CreateBingoGame(BingoGameInfoDto bingoGameInfoDto, int? maxWidth = null, int? maxHeight = null)
         {
             var existedBingoGame = _bingoGameDbContext.Bingo2dGameInfos
                 .FirstOrDefault(x => x.GameName == bingoGameInfoDto.GameName);
@@ -36,9 +36,20 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
                 throw new Exception($"Bingo Game {bingoGameInfoDto.GameName} already exist.");
             }
 
-            var bingoGameSetting = _optionDelegate.CurrentValue.First(g => g.GameName == bingoGameInfoDto.GameName);
+            int width, height;
+            if (maxWidth.HasValue && maxHeight.HasValue)
+            {
+                width = maxWidth.Value;
+                height = maxHeight.Value;
+            }
+            else
+            {
+                var bingoGameSetting = _optionDelegate.CurrentValue.First(g => g.GameName == bingoGameInfoDto.GameName);
+                width = bingoGameSetting.Width;
+                height = bingoGameSetting.Height;
+            }
 
-            var newBingoGame = new Bingo2dGameInfo(bingoGameInfoDto.GameName, bingoGameSetting.Width, bingoGameSetting.Height, bingoGameInfoDto.StartTime, bingoGameInfoDto.EndTime);
+            var newBingoGame = new Bingo2dGameInfo(bingoGameInfoDto.GameName, width, height, bingoGameInfoDto.StartTime, bingoGameInfoDto.EndTime);
             _bingoGameDbContext.Bingo2dGameInfos.Add(newBingoGame);
             _bingoGameDbContext.SaveChanges();
 

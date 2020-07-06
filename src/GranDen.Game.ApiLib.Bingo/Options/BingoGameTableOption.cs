@@ -13,6 +13,7 @@ namespace GranDen.Game.ApiLib.Bingo.Options
     /// <summary>
     /// Bingo Game Table setting definition
     /// </summary>
+    // ReSharper disable once ClassNeverInstantiated.Global
     public class BingoGameTableSetting
     {
         /// <summary>
@@ -26,6 +27,7 @@ namespace GranDen.Game.ApiLib.Bingo.Options
         /// </summary>
         /// <value>Must be (x1, y1), (x2, y2), (x3, y3), ... | 'Prize Name' format string list</value>
         [Required]
+        // ReSharper disable once CollectionNeverUpdated.Global
         public List<string> PrizeLines { get; set; }
     }
 }

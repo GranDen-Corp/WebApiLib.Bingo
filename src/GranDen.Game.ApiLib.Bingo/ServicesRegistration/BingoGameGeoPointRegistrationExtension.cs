@@ -4,7 +4,6 @@ using GranDen.Game.ApiLib.Bingo.Models;
 using GranDen.Game.ApiLib.Bingo.Repositories.Interfaces;
 using GranDen.Game.ApiLib.Bingo.Services;
 using GranDen.Game.ApiLib.Bingo.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
@@ -30,33 +29,55 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
             return serviceCollection;
         }
 
+
         /// <summary>
-        /// Assign a collection of preset <c>MappingGeoPoint</c> entities data
+        /// Register <c>IPresetGeoPointService</c> in the <c>IServiceCollection</c>
         /// </summary>
         /// <param name="serviceCollection"></param>
         /// <param name="geoPointIds"></param>
         /// <returns></returns>
-        /// <exception cref="Exception"></exception>
-        public static IServiceCollection InitGeoPointData(this IServiceCollection serviceCollection,
+        public static IServiceCollection ConfigPresetGeoPointData(this IServiceCollection serviceCollection,
             IEnumerable<string> geoPointIds)
         {
-            //TODO: Should using EF Core's data seeding mechanism to fill those preset data?
-            var serviceProvider = serviceCollection.BuildServiceProvider();
+            serviceCollection.AddSingleton<IPresetGeoPointService>(provider =>
+                new PresetGeoPointService {GeoPoints = geoPointIds});
 
-            var dbContext = serviceProvider.GetService<BingoGameDbContext>();
-            if (dbContext.Database.EnsureCreated())
+            return serviceCollection;
+        }
+
+        /// <summary>
+        /// Assign a collection of preset <c>MappingGeoPoint</c> entities 
+        /// </summary>
+        /// <param name="serviceProvider"></param>
+        /// <param name="geoPointIds">Additional Preset Data</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public static IServiceProvider InitGeoPointData(this IServiceProvider serviceProvider,
+            IEnumerable<string> geoPointIds = null)
+        {
+            var mappingGeoPointsRepo = serviceProvider.GetService<IMappingGeoPointsRepo>();
+            var presetGeoPointService = serviceProvider.GetService<IPresetGeoPointService>();
+            if (presetGeoPointService != null)
             {
-                dbContext.Database.Migrate();
+                var presetGeoPointData = serviceProvider.GetService<IPresetGeoPointService>().GeoPoints;
+
+                if (!mappingGeoPointsRepo.CreateMappingGeoPoints(presetGeoPointData))
+                {
+                    throw new Exception("Preset Bingo Game Db MappingGeoPoint failed.");
+                }
             }
 
-            var mappingGeoPointsRepo = serviceProvider.GetService<IMappingGeoPointsRepo>();
+            if (geoPointIds == null)
+            {
+                return serviceProvider;
+            }
 
             if (!mappingGeoPointsRepo.CreateMappingGeoPoints(geoPointIds))
             {
                 throw new Exception("Preset Bingo Game Db MappingGeoPoint failed.");
             }
 
-            return serviceCollection;
+            return serviceProvider;
         }
     }
 }
