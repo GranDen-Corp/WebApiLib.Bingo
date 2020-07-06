@@ -58,7 +58,7 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
         /// <param name="serviceProvider"></param>
         /// <param name="bingoGameOption"></param>
         /// <returns></returns>
-        public static IServiceProvider InitBingoGameData(this IServiceProvider serviceProvider, BingoGameOption bingoGameOption)
+        public static IServiceProvider InitPresetBingoGameData(this IServiceProvider serviceProvider, BingoGameOption bingoGameOption)
         {
             var gameInfoDtos = bingoGameOption.Select(o =>
                 new BingoGameInfoDto
@@ -70,7 +70,7 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
                     Enabled = true
                 }).ToList();
 
-            return InitBingoGameData(serviceProvider, gameInfoDtos);
+            return InitPresetBingoGameData(serviceProvider, gameInfoDtos);
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
         /// <param name="bingoGameInfos">Additional Preset Data</param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static IServiceProvider InitBingoGameData(this IServiceProvider serviceProvider, IEnumerable<BingoGameInfoDto> bingoGameInfos = null)
+        public static IServiceProvider InitPresetBingoGameData(this IServiceProvider serviceProvider, IEnumerable<BingoGameInfoDto> bingoGameInfos = null)
         {
             var bingoGameInfoRepo = serviceProvider.GetService<IBingoGameInfoRepo>();
             var presetBingoGameService = serviceProvider.GetService<IPresetBingoGameService>();
@@ -91,15 +91,10 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
                 {
                     if (bingoGameInfoRepo.QueryBingoGames().Any(g => g.GameName == bingoGameInfoDto.GameName))
                     {
-                        if (!bingoGameInfoRepo.UpdateBingoGame(bingoGameInfoDto))
-                        {
-                            throw new Exception($"Update existing Bingo Game {bingoGameInfoDto.GameName} failed.");
-                        }
+                       continue; 
                     }
-                    else
-                    {
-                        bingoGameInfoRepo.CreateBingoGame(bingoGameInfoDto);
-                    }
+
+                    bingoGameInfoRepo.CreateBingoGame(bingoGameInfoDto);
                 }
             }
 
@@ -112,15 +107,10 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
             {
                 if (bingoGameInfoRepo.QueryBingoGames().Any(g => g.GameName == bingoGameInfoDto.GameName))
                 {
-                    if (!bingoGameInfoRepo.UpdateBingoGame(bingoGameInfoDto))
-                    {
-                        throw new Exception($"Update existing Bingo Game {bingoGameInfoDto.GameName} failed.");
-                    }
+                   continue;;
                 }
-                else
-                {
-                    bingoGameInfoRepo.CreateBingoGame(bingoGameInfoDto);
-                }
+
+                bingoGameInfoRepo.CreateBingoGame(bingoGameInfoDto);
             }
 
             return serviceProvider;

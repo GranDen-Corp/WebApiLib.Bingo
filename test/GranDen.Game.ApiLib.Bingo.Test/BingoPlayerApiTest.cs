@@ -119,7 +119,8 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             Assert.True(marked2);
             var bingoPointRepo = _serviceProvider.GetService<IBingoPointRepo>();
             var markedPoints = bingoPointRepo.QueryBingoPoints(PresetBingoGameName, testPlayerId)
-                .Include(m => m.BelongingGame).Include(m => m.BelongingPlayer).Where(p => p.MarkPoint.Marked).ToList();
+                .Include(m => m.BelongingGame).Include(m => m.BelongingPlayer)
+                .Where(p => p.MarkPoint.Marked).OrderBy(p => p.MarkPoint.X).ThenBy(p => p.MarkPoint.Y).ToList();
 
             Assert.Equal(3, markedPoints.Count);
 
@@ -255,7 +256,9 @@ namespace GranDen.Game.ApiLib.Bingo.Test
 
         private void PresetData()
         {
-            var dbContext = _serviceProvider.GetService<BingoGameDbContext>();
+            using var serviceScope = _serviceProvider.CreateScope();
+            var serviceProvider = serviceScope.ServiceProvider;
+            var dbContext = serviceProvider.GetService<BingoGameDbContext>();
 
             //NOTE: doesn't know why in-memory SQLite DB cannot just call Migration() to create DB Schema
             if (!dbContext.Database.EnsureCreated())
@@ -263,8 +266,8 @@ namespace GranDen.Game.ApiLib.Bingo.Test
                 dbContext.Database.Migrate();
             }
 
-            _serviceProvider.InitGeoPointData();
-            _serviceProvider.InitBingoGameData();
+            serviceProvider.InitPresetGeoPointData();
+            serviceProvider.InitPresetBingoGameData();
         }
 
         private static DbConnection CreateInMemoryDatabase()
