@@ -52,7 +52,7 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
         /// <param name="geoPointIds">Additional Preset Data</param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static IServiceProvider InitGeoPointData(this IServiceProvider serviceProvider,
+        public static IServiceProvider InitPresetGeoPointData(this IServiceProvider serviceProvider,
             IEnumerable<string> geoPointIds = null)
         {
             var mappingGeoPointsRepo = serviceProvider.GetService<IMappingGeoPointsRepo>();
