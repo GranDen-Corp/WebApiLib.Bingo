@@ -98,6 +98,33 @@ namespace GranDen.Game.ApiLib.Bingo.Test
         }
 
         [Fact]
+        public void CanGetCorrectMarked2DPoint()
+        {
+            //Arrange
+            const string testPlayerId = "test_player_1";
+            const string testGeoPointId = "geoPoint_07";
+
+            var bingoGameService = _serviceProvider.GetService<IBingoGameService<string>>();
+
+            Assert.True(bingoGameService.JoinGame(PresetBingoGameName, testPlayerId));
+            Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 1, Y = 2}));
+
+            //Act
+            var bingoPointRepo = _serviceProvider.GetService<IBingoPointRepo>();
+            var candidateBingoPoints = bingoPointRepo.GetMappedBingoPoint(PresetBingoGameName, testPlayerId, testGeoPointId);
+
+            //Assert
+            var bingoPoints = candidateBingoPoints.ToList();
+            Assert.Single(bingoPoints);
+            var thePoint = bingoPoints.First();
+            Assert.Equal(PresetBingoGameName, thePoint.BelongingGame.GameName);
+            Assert.Equal(testPlayerId, thePoint.BelongingPlayer.PlayerId);
+            Assert.Equal(1, thePoint.MarkPoint.X);
+            Assert.Equal(2, thePoint.MarkPoint.Y);
+            Assert.True(thePoint.MarkPoint.Marked);
+        }
+
+        [Fact]
         public void PlayerCanAddBingoPointStatusDuringValidGamePeriod()
         {
             //Arrange
