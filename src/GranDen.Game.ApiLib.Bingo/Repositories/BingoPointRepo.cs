@@ -29,7 +29,9 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
         public IEnumerable<BingoPoint> GetMappedBingoPoint(string bingoGameName, string bingoPlayerId, string geoPointId)
         {
             var geoPoint = _bingoGameDbContext.MappingGeoPoints.AsNoTracking()
-                .Include(m => m.PointProjections).ThenInclude(p => p.BingoPoint)
+                .Include(m => m.PointProjections).ThenInclude(p => p.BingoPlayerInfo)
+                .Include(m => m.PointProjections).ThenInclude(p => p.BingoPoint).ThenInclude(b => b.BelongingGame)
+                .Include(m => m.PointProjections).ThenInclude(p => p.BingoPoint).ThenInclude(b => b.BelongingPlayer)
                 .FirstOrDefault(m =>
                     m.GeoPointId == geoPointId || m.GeoPointRedirected && m.RedirectedGeoPointId == geoPointId);
 
@@ -39,18 +41,20 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
             }
 
             var pointProjections =
-                geoPoint.PointProjections.Where(p => p.BingoPlayerInfo.PlayerId == bingoPlayerId ).ToList();
+                geoPoint.PointProjections.Where(p => p.BingoPlayerInfo.PlayerId == bingoPlayerId).ToList();
 
             if (pointProjections.Count == 0)
             {
                 throw new Exception($"Point Projection not exist.");
             }
 
-            var ret = pointProjections.Where(p => p.BingoPoint.BelongingGame.GameName == bingoGameName).Select( p => p.BingoPoint).ToList();
+            var ret = pointProjections.Where(p => p.BingoPoint.BelongingGame.GameName == bingoGameName)
+                .Select(p => p.BingoPoint).ToList();
 
             if (ret.Count == 0)
             {
-                throw new Exception($"Bingo mark point(s) at Geo Point Id '{geoPointId}' that belongs to player '{bingoPlayerId}' on Bingo Game '{bingoGameName}' not exist.");
+                throw new Exception(
+                    $"Bingo mark point(s) at Geo Point Id '{geoPointId}' that belongs to player '{bingoPlayerId}' on Bingo Game '{bingoGameName}' not exist.");
             }
 
             return ret;
