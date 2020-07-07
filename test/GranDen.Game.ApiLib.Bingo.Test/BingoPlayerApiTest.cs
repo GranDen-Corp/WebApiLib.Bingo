@@ -79,10 +79,9 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             var bingoGamePlayerRepo = _serviceProvider.GetService<IBingoGamePlayerRepo>();
 
             //Act
-            var gameId = bingoGameInfoRepo.CreateBingoGame(new BingoGameInfoDto
-            {
-                GameName = bingoGameName, I18nDisplayKey = "ui_key1", StartTime = DateTimeOffset.UtcNow
-            }, 4, 4);
+            var gameId = bingoGameInfoRepo.CreateBingoGame(
+                new BingoGameInfoDto {GameName = bingoGameName, I18nDisplayKey = "ui_key1", StartTime = DateTimeOffset.UtcNow},
+                4, 4);
 
             var joined = bingoGameService.JoinGame(bingoGameName, testPlayerId);
 
@@ -112,19 +111,44 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             var marked0 = bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 0, Y = 0});
             var marked1 = bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 0, Y = 1});
             var marked2 = bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 0, Y = 2});
-
+            var markedPoints = bingoGameService.GetPlayerBingoPointStatus(PresetBingoGameName, testPlayerId)
+                .Where(p => p.Marked).OrderBy(p => p.X).ThenBy(p => p.Y).ToList();
             //Assert
             Assert.True(marked0);
             Assert.True(marked1);
             Assert.True(marked2);
+            Assert.Equal(3, markedPoints.Count);
+            Assert.Collection(markedPoints,
+                m =>
+                {
+                    Assert.Equal(0, m.X);
+                    Assert.Equal(0, m.Y);
+                    Assert.True(m.Marked);
+                },
+                m =>
+                {
+                    Assert.Equal(0, m.X);
+                    Assert.Equal(1, m.Y);
+                    Assert.True(m.Marked);
+                },
+                m =>
+                {
+                    Assert.Equal(0, m.X);
+                    Assert.Equal(2, m.Y);
+                    Assert.True(m.Marked);
+                }
+            );
+
+            //Get inner DB data to exam point belonging owner
             var bingoPointRepo = _serviceProvider.GetService<IBingoPointRepo>();
-            var markedPoints = bingoPointRepo.QueryBingoPoints(PresetBingoGameName, testPlayerId)
+
+            var bingoPoints = bingoPointRepo.QueryBingoPoints(PresetBingoGameName, testPlayerId)
                 .Include(m => m.BelongingGame).Include(m => m.BelongingPlayer)
                 .Where(p => p.MarkPoint.Marked).OrderBy(p => p.MarkPoint.X).ThenBy(p => p.MarkPoint.Y).ToList();
 
             Assert.Equal(3, markedPoints.Count);
 
-            Assert.Collection(markedPoints,
+            Assert.Collection(bingoPoints,
                 m =>
                 {
                     Assert.Equal(PresetBingoGameName, m.BelongingGame.GameName);

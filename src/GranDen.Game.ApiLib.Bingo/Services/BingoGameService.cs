@@ -7,6 +7,7 @@ using GranDen.Game.ApiLib.Bingo.Options;
 using GranDen.Game.ApiLib.Bingo.Repositories.Interfaces;
 using GranDen.Game.ApiLib.Bingo.Services.Interfaces;
 using GranDen.GameLib.Bingo;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace GranDen.Game.ApiLib.Bingo.Services
@@ -33,9 +34,10 @@ namespace GranDen.Game.ApiLib.Bingo.Services
         /// <param name="bingoGameOptionDelegate"></param>
         /// <param name="bingoGameTableOptionDelegate"></param>
         public BingoGameService(BingoGameDbContext bingoGameDbContext,
-            IBingoGameInfoRepo bingoGameInfoRepo, IBingoGamePlayerRepo bingoGamePlayerRepo, IBingoPointRepo bingoPointRepo, 
+            IBingoGameInfoRepo bingoGameInfoRepo, IBingoGamePlayerRepo bingoGamePlayerRepo, IBingoPointRepo bingoPointRepo,
             IGeoPointIdProvider geoPointIdProvider,
-            IOptionsMonitor<BingoGameOption> bingoGameOptionDelegate, IOptionsMonitor<BingoGameTableOption> bingoGameTableOptionDelegate)
+            IOptionsMonitor<BingoGameOption> bingoGameOptionDelegate,
+            IOptionsMonitor<BingoGameTableOption> bingoGameTableOptionDelegate)
         {
             _bingoGameDbContext = bingoGameDbContext;
             _bingoGameInfoRepo = bingoGameInfoRepo;
@@ -49,27 +51,27 @@ namespace GranDen.Game.ApiLib.Bingo.Services
         /// <inheritdoc />
         public ICollection<BingoGameInfoDto> GetAttendableGames(DateTimeOffset current)
         {
-           var games =  
-               _bingoGameDbContext.Bingo2dGameInfos
-                   .Where( x => x.Enabled && x.StartTime <= current && (!x.EndTime.HasValue || current < x.EndTime))
-                   .Select(g => new BingoGameInfoDto
-                       {GameName = g.GameName, Enabled = g.Enabled, StartTime = g.StartTime, EndTime = g.EndTime}).ToList();
+            var games =
+                _bingoGameDbContext.Bingo2dGameInfos
+                    .Where(x => x.Enabled && x.StartTime <= current && (!x.EndTime.HasValue || current < x.EndTime))
+                    .Select(g => new BingoGameInfoDto
+                    {
+                        GameName = g.GameName, Enabled = g.Enabled, StartTime = g.StartTime, EndTime = g.EndTime
+                    }).ToList();
 
-           return games;
+            return games;
         }
 
         /// <inheritdoc />
         public bool JoinGame(string gameName, string playerId)
         {
             var game = _bingoGameInfoRepo.GetByName(gameName);
-            
+
             if (game == null)
             {
                 var bingoGameInfoDto = new BingoGameInfoDto
                 {
-                    GameName = gameName,
-                    Enabled = true,
-                    StartTime = DateTimeOffset.UtcNow
+                    GameName = gameName, Enabled = true, StartTime = DateTimeOffset.UtcNow
                 };
                 _bingoGameInfoRepo.CreateBingoGame(bingoGameInfoDto);
 
@@ -81,7 +83,9 @@ namespace GranDen.Game.ApiLib.Bingo.Services
                 return false;
             }
 
-            var player = _bingoGamePlayerRepo.GetBingoGamePlayer(playerId).FirstOrDefault() ?? _bingoGamePlayerRepo.InitBingoGamePlayerData(gameName, playerId, _geoPointIdProvider.GeoPointIdInitializer);
+            var player = _bingoGamePlayerRepo.GetBingoGamePlayer(playerId).FirstOrDefault() ??
+                         _bingoGamePlayerRepo.InitBingoGamePlayerData(gameName, playerId,
+                             _geoPointIdProvider.GeoPointIdInitializer);
 
             return player.JoinedGames.Any(g => g.GameName == gameName);
         }
@@ -90,7 +94,7 @@ namespace GranDen.Game.ApiLib.Bingo.Services
         public bool MarkBingoPoint(string gameName, string playerId, (int x, int y) point, DateTimeOffset markedTime)
         {
             var (x, y) = point;
-            var bingoPoint = _bingoPointRepo.QueryBingoPoints(gameName, playerId).ToList()
+            var bingoPoint = _bingoPointRepo.QueryBingoPoints(gameName, playerId)
                 .FirstOrDefault(p => p.MarkPoint.X == x && p.MarkPoint.Y == y);
 
             if (bingoPoint == null)
@@ -119,7 +123,7 @@ namespace GranDen.Game.ApiLib.Bingo.Services
         /// <inheritdoc />
         public ICollection<MarkPoint2D> GetPlayerBingoPointStatus(string gameName, string playerId)
         {
-            return _bingoPointRepo.QueryBingoPoints(gameName, playerId).Select(b => b.MarkPoint).ToList();
+            return _bingoPointRepo.QueryBingoPoints(gameName, playerId).AsNoTracking().Select(b => b.MarkPoint).ToList();
         }
 
         /// <inheritdoc />
@@ -139,7 +143,7 @@ namespace GranDen.Game.ApiLib.Bingo.Services
             {
                 throw new Exception($"Bingo game table {bingoGameSetting.GameTableKey} not found or no prize settings exist.");
             }
-            
+
             var bingoPoints = _bingoPointRepo.QueryBingoPoints(gameName, playerId).ToList();
             if (!bingoPoints.Any())
             {
