@@ -20,6 +20,8 @@ namespace GranDen.Game.ApiLib.Bingo.Test
 {
     public class BingoPlayerApiTest : IDisposable
     {
+        #region Constant Definition
+
         private const string PresetBingoGameName = "DemoGame";
 
         private const string BingoGameOptionJsonStr = @"
@@ -54,6 +56,8 @@ namespace GranDen.Game.ApiLib.Bingo.Test
 }
 ";
 
+        #endregion
+        
         private readonly DbConnection _connection;
         private IConfigurationRoot _configuration;
         private ServiceProvider _serviceProvider;
@@ -268,6 +272,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             serviceCollection.AddBingoGameDbContext(builder =>
             {
                 builder.UseSqlite(_connection);
+                builder.EnableSensitiveDataLogging();
                 builder.EnableDetailedErrors();
             });
 
