@@ -15,14 +15,14 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
     /// </summary>
     public static class BingoGamePresetDataExtension
     {
-        
         /// <summary>
         /// Register <c>IPresetBingoGameService</c> in the <c>IServiceCollection</c>
         /// </summary>
         /// <param name="serviceCollection"></param>
         /// <param name="bingoGameOption"></param>
         /// <returns></returns>
-        public static IServiceCollection ConfigPresetBingoGameData(this IServiceCollection serviceCollection, BingoGameOption bingoGameOption)
+        public static IServiceCollection ConfigPresetBingoGameData(this IServiceCollection serviceCollection,
+            BingoGameOption bingoGameOption)
         {
             var bingoGameInfoDtos = bingoGameOption.Select(o =>
                 new BingoGameInfoDto
@@ -36,7 +36,7 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
 
             return ConfigPresetBingoGameData(serviceCollection, bingoGameInfoDtos);
         }
-        
+
         /// <summary>
         /// Register <c>IPresetBingoGameService</c> in the <c>IServiceCollection</c>
         /// </summary>
@@ -58,7 +58,8 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
         /// <param name="serviceProvider"></param>
         /// <param name="bingoGameOption"></param>
         /// <returns></returns>
-        public static IServiceProvider InitPresetBingoGameData(this IServiceProvider serviceProvider, BingoGameOption bingoGameOption)
+        public static IServiceProvider InitPresetBingoGameData(this IServiceProvider serviceProvider,
+            BingoGameOption bingoGameOption)
         {
             var gameInfoDtos = bingoGameOption.Select(o =>
                 new BingoGameInfoDto
@@ -80,22 +81,15 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
         /// <param name="bingoGameInfos">Additional Preset Data</param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static IServiceProvider InitPresetBingoGameData(this IServiceProvider serviceProvider, IEnumerable<BingoGameInfoDto> bingoGameInfos = null)
+        public static IServiceProvider InitPresetBingoGameData(this IServiceProvider serviceProvider,
+            IEnumerable<BingoGameInfoDto> bingoGameInfos = null)
         {
             var bingoGameInfoRepo = serviceProvider.GetService<IBingoGameInfoRepo>();
             var presetBingoGameService = serviceProvider.GetService<IPresetBingoGameService>();
             if (presetBingoGameService != null)
             {
                 var presetBingoGames = presetBingoGameService.GameInfoDtos.ToList();
-                foreach (var bingoGameInfoDto in presetBingoGames)
-                {
-                    if (bingoGameInfoRepo.QueryBingoGames().Any(g => g.GameName == bingoGameInfoDto.GameName))
-                    {
-                       continue; 
-                    }
-
-                    bingoGameInfoRepo.CreateBingoGame(bingoGameInfoDto);
-                }
+                CreatePresetBingoGames(bingoGameInfoRepo, presetBingoGames);
             }
 
             if (bingoGameInfos == null)
@@ -103,17 +97,23 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
                 return serviceProvider;
             }
 
+            CreatePresetBingoGames(bingoGameInfoRepo, bingoGameInfos);
+            return serviceProvider;
+        }
+
+        private static void CreatePresetBingoGames(IBingoGameInfoRepo bingoGameInfoRepo,
+            IEnumerable<BingoGameInfoDto> bingoGameInfos)
+        {
             foreach (var bingoGameInfoDto in bingoGameInfos)
             {
                 if (bingoGameInfoRepo.QueryBingoGames().Any(g => g.GameName == bingoGameInfoDto.GameName))
                 {
-                   continue;;
+                    continue;
+                    ;
                 }
 
                 bingoGameInfoRepo.CreateBingoGame(bingoGameInfoDto);
             }
-
-            return serviceProvider;
         }
     }
 }
