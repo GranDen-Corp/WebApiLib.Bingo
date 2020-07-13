@@ -59,9 +59,35 @@ namespace GranDen.Game.ApiLib.Bingo.Test
         private readonly DbConnection _connection;
         private readonly IConfigurationRoot _configuration;
         private readonly ServiceProvider _rootServiceProvider;
+        
+        public ErrorHandlingTest()
+        {
+            _connection = CreateInMemoryDatabase();
+            _configuration = InitConfiguration();
+            _rootServiceProvider = InitDependencyService();
+            PresetData();
+        }
 
         [Fact]
-        public void TestNotJoinedGameInvokeMarkBingoPointWillRaisePlayerNotJoinedGameException()
+        public void NotCreatedGame_Call_MarkBingoPoint_Cause_GameNotExistException()
+        {
+           //Arrange
+           const string bingoGameName = "testGame";
+           var bingoGameService = _rootServiceProvider.GetService<IBingoGameService<string>>();
+           
+           //Assert
+           var ex = Assert.Throws<GameNotExistException>(() =>
+           {
+               //Act
+               bingoGameService.MarkBingoPoint(bingoGameName, "test_player_id", (0, 0), DateTimeOffset.Now);
+           });
+           
+           Assert.IsType<GameNotExistException>(ex);
+           Assert.Equal(bingoGameName, ex.GameName);
+        }
+
+        [Fact]
+        public void NotJoinedGame_Call_MarkBingoPoint_Cause_PlayerNotJoinedGameException()
         {
             //Arrange
             const string testPlayerId = "test_player_1";
@@ -85,15 +111,25 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             Assert.Equal(bingoGameName, ex.GameName);
         }
 
-        #region Environment Setup
-
-        public ErrorHandlingTest()
+        [Fact]
+        public void NotCreatedGame_Call_GetAchievedBingoPrizes_Cause_GameNotExistException()
         {
-            _connection = CreateInMemoryDatabase();
-            _configuration = InitConfiguration();
-            _rootServiceProvider = InitDependencyService();
-            PresetData();
+           //Arrange
+           const string bingoGameName = "testGame";
+           var bingoGameService = _rootServiceProvider.GetService<IBingoGameService<string>>();
+           
+           //Assert
+           var ex = Assert.Throws<GameNotExistException>(() =>
+           {
+               //Act
+               bingoGameService.GetAchievedBingoPrizes(bingoGameName, "test_player_id");
+           });
+           
+           Assert.IsType<GameNotExistException>(ex);
+           Assert.Equal(bingoGameName, ex.GameName);
         }
+
+        #region Environment Setup
 
         private static IConfigurationRoot InitConfiguration()
         {

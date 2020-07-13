@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using GranDen.Game.ApiLib.Bingo.DTO;
+using GranDen.Game.ApiLib.Bingo.Exceptions;
 using GranDen.Game.ApiLib.Bingo.Models;
 using GranDen.Game.ApiLib.Bingo.Options;
 using GranDen.Game.ApiLib.Bingo.Repositories.Interfaces;
@@ -129,6 +130,13 @@ namespace GranDen.Game.ApiLib.Bingo.Services
         /// <inheritdoc />
         public ICollection<string> GetAchievedBingoPrizes(string gameName, string playerId)
         {
+            var game = _bingoGameInfoRepo.GetByName(gameName);
+
+            if (game == null)
+            {
+                throw new GameNotExistException(gameName);
+            }
+
             var bingoGameSetting = _bingoGameOptionDelegate.CurrentValue.FirstOrDefault(g => g.GameName == gameName);
             if (bingoGameSetting == null)
             {

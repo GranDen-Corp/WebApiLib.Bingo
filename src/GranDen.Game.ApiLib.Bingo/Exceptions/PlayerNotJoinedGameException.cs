@@ -3,7 +3,7 @@
 namespace GranDen.Game.ApiLib.Bingo.Exceptions
 {
     /// <summary>
-    /// Raise when query bingo prize (<c>GetAchievedBingoPrizes()</c>), get mark point status(<c>GetPlayerBingoPointStatus()</c>), set mark point(<c>MarkBingoPoint()</c>) when player not joined that game
+    /// Throw when query bingo prize (<c>GetAchievedBingoPrizes()</c>), get mark point status(<c>GetPlayerBingoPointStatus()</c>), set mark point(<c>MarkBingoPoint()</c>) that player not joined that game
     /// </summary>
     [Serializable]
     public class PlayerNotJoinedGameException : Exception
