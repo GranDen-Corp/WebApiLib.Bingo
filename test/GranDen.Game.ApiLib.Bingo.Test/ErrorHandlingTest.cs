@@ -3,22 +3,27 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.IO;
 using System.Text;
+using GranDen.Game.ApiLib.Bingo.DTO;
+using GranDen.Game.ApiLib.Bingo.Exceptions;
 using GranDen.Game.ApiLib.Bingo.Models;
 using GranDen.Game.ApiLib.Bingo.Options;
+using GranDen.Game.ApiLib.Bingo.Repositories.Interfaces;
+using GranDen.Game.ApiLib.Bingo.Services.Interfaces;
 using GranDen.Game.ApiLib.Bingo.ServicesRegistration;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Xunit;
 
 namespace GranDen.Game.ApiLib.Bingo.Test
 {
     public class ErrorHandlingTest : IDisposable
     {
-        
         #region Constant Definition
-        
+
         private const string PresetBingoGameName = "GameUnderTest";
+
         private const string BingoGameOptionJsonStr = @"
 {
     ""BingoGame"" : [
@@ -48,11 +53,37 @@ namespace GranDen.Game.ApiLib.Bingo.Test
     ]
 }
 ";
+
         #endregion
 
         private readonly DbConnection _connection;
         private readonly IConfigurationRoot _configuration;
         private readonly ServiceProvider _rootServiceProvider;
+
+        [Fact]
+        public void TestNotJoinedGameInvokeMarkBingoPointWillRaisePlayerNotJoinedGameException()
+        {
+            //Arrange
+            const string testPlayerId = "test_player_1";
+            const string bingoGameName = "testGame";
+            var bingoGameInfoRepo = _rootServiceProvider.GetService<IBingoGameInfoRepo>();
+            var bingoGameService = _rootServiceProvider.GetService<IBingoGameService<string>>();
+            var gameId = bingoGameInfoRepo.CreateBingoGame(
+                new BingoGameInfoDto {GameName = bingoGameName, I18nDisplayKey = "ui_key1", StartTime = DateTimeOffset.UtcNow},
+                4, 4);
+            Assert.NotEqual(0, gameId);
+
+            //Assert
+            var ex = Assert.Throws<PlayerNotJoinedGameException>(() =>
+            {
+                //Act
+                bingoGameService.MarkBingoPoint(bingoGameName, testPlayerId, (0, 0), DateTimeOffset.Now);
+            });
+
+            Assert.IsType<PlayerNotJoinedGameException>(ex);
+            Assert.Equal(testPlayerId, ex.PlayerId);
+            Assert.Equal(bingoGameName, ex.GameName);
+        }
 
         #region Environment Setup
 
@@ -82,7 +113,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
                 builder.EnableSensitiveDataLogging();
                 builder.EnableDetailedErrors();
             });
-            
+
             serviceCollection.ConfigPresetGeoPointData(new[]
             {
                 "geoPoint_01", "geoPoint_02", "geoPoint_03", "geoPoint_04", "geoPoint_05", "geoPoint_06", "geoPoint_07",
@@ -109,7 +140,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
 
             return serviceCollection.BuildServiceProvider();
         }
-        
+
         private void PresetData()
         {
             using var serviceScope = _rootServiceProvider.CreateScope();
@@ -127,11 +158,11 @@ namespace GranDen.Game.ApiLib.Bingo.Test
 
         private static DbConnection CreateInMemoryDatabase()
         {
-            var connection = new SqliteConnection("Filename=:memory");
+            var connection = new SqliteConnection("Filename=:memory:");
             connection.Open();
             return connection;
         }
-        
+
         #endregion
 
         public void Dispose() => _connection.Dispose();
