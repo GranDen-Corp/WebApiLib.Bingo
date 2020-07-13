@@ -22,7 +22,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
     {
         #region Constant Definition
 
-        private const string PresetBingoGameName = "GameUnderTest";
+        private const string PresetBingoGameName = "DemoGame";
 
         private const string BingoGameOptionJsonStr = @"
 {
@@ -86,30 +86,6 @@ namespace GranDen.Game.ApiLib.Bingo.Test
            Assert.Equal(bingoGameName, ex.GameName);
         }
 
-        [Fact]
-        public void NotJoinedGame_Call_MarkBingoPoint_Cause_PlayerNotJoinedGameException()
-        {
-            //Arrange
-            const string testPlayerId = "test_player_1";
-            const string bingoGameName = "testGame";
-            var bingoGameInfoRepo = _rootServiceProvider.GetService<IBingoGameInfoRepo>();
-            var bingoGameService = _rootServiceProvider.GetService<IBingoGameService<string>>();
-            var gameId = bingoGameInfoRepo.CreateBingoGame(
-                new BingoGameInfoDto {GameName = bingoGameName, I18nDisplayKey = "ui_key1", StartTime = DateTimeOffset.UtcNow},
-                4, 4);
-            Assert.NotEqual(0, gameId);
-
-            //Assert
-            var ex = Assert.Throws<PlayerNotJoinedGameException>(() =>
-            {
-                //Act
-                bingoGameService.MarkBingoPoint(bingoGameName, testPlayerId, (0, 0), DateTimeOffset.Now);
-            });
-
-            Assert.IsType<PlayerNotJoinedGameException>(ex);
-            Assert.Equal(testPlayerId, ex.PlayerId);
-            Assert.Equal(bingoGameName, ex.GameName);
-        }
 
         [Fact]
         public void NotCreatedGame_Call_GetAchievedBingoPrizes_Cause_GameNotExistException()
@@ -127,6 +103,44 @@ namespace GranDen.Game.ApiLib.Bingo.Test
            
            Assert.IsType<GameNotExistException>(ex);
            Assert.Equal(bingoGameName, ex.GameName);
+        }
+        
+        [Fact]
+        public void NotJoinedGame_Call_MarkBingoPoint_Cause_PlayerNotJoinedGameException()
+        {
+            //Arrange
+            const string testPlayerId = "test_player_1";
+            var bingoGameService = _rootServiceProvider.GetService<IBingoGameService<string>>();
+
+            //Assert
+            var ex = Assert.Throws<PlayerNotJoinedGameException>(() =>
+            {
+                //Act
+                bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, (0, 0), DateTimeOffset.Now);
+            });
+
+            Assert.IsType<PlayerNotJoinedGameException>(ex);
+            Assert.Equal(testPlayerId, ex.PlayerId);
+            Assert.Equal(PresetBingoGameName, ex.GameName);
+        }
+
+        [Fact]
+        public void NotJoinedGame_Call_GetAchievedBingoPrizes_Cause_PlayerNotJoinedGameException()
+        {
+            //Arrange
+            const string testPlayerId = "test_player_1";
+            var bingoGameService = _rootServiceProvider.GetService<IBingoGameService<string>>();
+
+            //Assert
+            var ex = Assert.Throws<PlayerNotJoinedGameException>(() =>
+            {
+                //Act
+                bingoGameService.GetAchievedBingoPrizes(PresetBingoGameName, testPlayerId);
+            });
+
+            Assert.IsType<PlayerNotJoinedGameException>(ex);
+            Assert.Equal(testPlayerId, ex.PlayerId);
+            Assert.Equal(PresetBingoGameName, ex.GameName);
         }
 
         #region Environment Setup
