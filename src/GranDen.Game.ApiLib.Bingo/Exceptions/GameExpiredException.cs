@@ -3,16 +3,16 @@
 namespace GranDen.Game.ApiLib.Bingo.Exceptions
 {
     /// <summary>
-    /// Throw when no such game name exist.
+    /// Throws when accessing expired game(s)
     /// </summary>
     [Serializable]
-    public class GameNotExistException : AbstractGameException
+    public class GameExpiredException : AbstractGameException
     {
         /// <summary>
         /// Exception class constructor
         /// </summary>
         /// <param name="gameName"></param>
-        public GameNotExistException(string gameName) : base($"No such Game {gameName}")
+        public GameExpiredException(string gameName) : base($"Game {gameName} expired")
         {
             GameName = gameName;
         }

@@ -110,7 +110,6 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
                 if (bingoGameInfoRepo.QueryBingoGames().Any(g => g.GameName == bingoGameInfoDto.GameName))
                 {
                     continue;
-                    ;
                 }
 
                 bingoGameInfoRepo.CreateBingoGame(bingoGameInfoDto);

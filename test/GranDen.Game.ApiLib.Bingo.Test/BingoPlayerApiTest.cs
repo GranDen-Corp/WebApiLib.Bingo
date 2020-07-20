@@ -5,11 +5,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using GranDen.Game.ApiLib.Bingo.DTO;
+using GranDen.Game.ApiLib.Bingo.Exceptions;
 using GranDen.Game.ApiLib.Bingo.Models;
 using GranDen.Game.ApiLib.Bingo.Options;
 using GranDen.Game.ApiLib.Bingo.Repositories.Interfaces;
 using GranDen.Game.ApiLib.Bingo.Services.Interfaces;
 using GranDen.Game.ApiLib.Bingo.ServicesRegistration;
+using GranDen.TimeLib.ClockShaft;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -57,7 +59,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
 ";
 
         #endregion
-        
+
         private readonly DbConnection _connection;
         private IConfigurationRoot _configuration;
         private ServiceProvider _serviceProvider;
@@ -82,9 +84,19 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             var bingoGameService = _serviceProvider.GetService<IBingoGameService<string>>();
             var bingoGamePlayerRepo = _serviceProvider.GetService<IBingoGamePlayerRepo>();
 
+            ClockWork.ShaftConfigurationFunc = shaft =>
+            {
+                shaft.Backward = true;
+                shaft.ShiftTimeSpan = new TimeSpan(0, 0, 3, 0);
+                return shaft;
+            };
+
             //Act
             var gameId = bingoGameInfoRepo.CreateBingoGame(
-                new BingoGameInfoDto {GameName = bingoGameName, I18nDisplayKey = "ui_key1", StartTime = DateTimeOffset.UtcNow},
+                new BingoGameInfoDto
+                {
+                    GameName = bingoGameName, I18nDisplayKey = "ui_key1", StartTime = ClockWork.DateTimeOffset.UtcNow
+                },
                 4, 4);
 
             var joined = bingoGameService.JoinGame(bingoGameName, testPlayerId);
@@ -244,9 +256,49 @@ namespace GranDen.Game.ApiLib.Bingo.Test
                 });
         }
 
-        [Fact(Skip = "TBD")]
+        [Fact]
         public void PlayerShouldNotAddBingoRecordsAfterGameExpired()
         {
+            //Arrange
+            const string testPlayerId = "test_player_1";
+            const string bingoGameName = "testGame";
+            var bingoGameInfoRepo = _serviceProvider.GetService<IBingoGameInfoRepo>();
+
+            var bingoGameService = _serviceProvider.GetService<IBingoGameService<string>>();
+            var bingoGamePlayerRepo = _serviceProvider.GetService<IBingoGamePlayerRepo>();
+
+            ClockWork.ShaftConfigurationFunc = shaft =>
+            {
+                shaft.Backward = true;
+                shaft.ShiftTimeSpan = new TimeSpan(0, 1, 0, 0);
+                return shaft;
+            };
+
+            var startTime = ClockWork.DateTimeOffset.UtcNow;
+            var endTime = startTime + TimeSpan.FromMinutes(30.0);
+
+            //Act
+            var gameId = bingoGameInfoRepo.CreateBingoGame(
+                new BingoGameInfoDto
+                {
+                    GameName = bingoGameName, I18nDisplayKey = "ui_key1", StartTime = startTime, EndTime = endTime
+                },
+                4, 4);
+
+            //Assert
+            Assert.NotEqual(0, gameId);
+            ClockWork.Reset();
+            var ex = Assert.Throws<GameExpiredException>(() =>
+            {
+                bingoGameService.JoinGame(bingoGameName, testPlayerId);
+            });
+
+            Assert.IsType<GameExpiredException>(ex);
+            Assert.Equal(bingoGameName, ex.GameName);
+            
+            var bingoPlayer = bingoGamePlayerRepo.QueryBingoPlayer().Include(p => p.JoinedGames)
+                .FirstOrDefault(p => p.PlayerId == testPlayerId);
+            Assert.Null(bingoPlayer);
         }
 
         [Fact(Skip = "TBD")]
