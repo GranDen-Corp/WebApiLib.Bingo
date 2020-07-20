@@ -70,13 +70,7 @@ namespace GranDen.Game.ApiLib.Bingo.Services
 
             if (game == null)
             {
-                var bingoGameInfoDto = new BingoGameInfoDto
-                {
-                    GameName = gameName, Enabled = true, StartTime = DateTimeOffset.UtcNow
-                };
-                _bingoGameInfoRepo.CreateBingoGame(bingoGameInfoDto);
-
-                game = _bingoGameInfoRepo.GetByName(gameName);
+               throw new GameNotExistException(gameName);
             }
 
             if (game.JoinedPlayers.Any(p => p.PlayerId == playerId))

@@ -6,6 +6,7 @@ using GranDen.Game.ApiLib.Bingo.Options;
 using GranDen.Game.ApiLib.Bingo.Repositories.Interfaces;
 using GranDen.Game.ApiLib.Bingo.Services;
 using GranDen.Game.ApiLib.Bingo.Services.Interfaces;
+using GranDen.TimeLib.ClockShaft;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
@@ -29,7 +30,7 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
                 {
                     GameName = o.GameName,
                     I18nDisplayKey = o.I18nKey,
-                    StartTime = o.GameStart ?? DateTimeOffset.UtcNow,
+                    StartTime = o.GameStart ?? ClockWork.DateTimeOffset.UtcNow,
                     EndTime = o.GameEnd,
                     Enabled = true
                 }).ToList();
@@ -66,7 +67,7 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
                 {
                     GameName = o.GameName,
                     I18nDisplayKey = o.I18nKey,
-                    StartTime = o.GameStart ?? DateTimeOffset.UtcNow,
+                    StartTime = o.GameStart ?? ClockWork.DateTimeOffset.UtcNow,
                     EndTime = o.GameEnd,
                     Enabled = true
                 }).ToList();
