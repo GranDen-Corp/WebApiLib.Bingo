@@ -14,6 +14,8 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
+  sdkVersion: '3.1.x'
+  usePreviewSdk: false
   sourceProject: 'src/**/*.csproj'
   testNetCoreProject: 'test/**/*Test.csproj'
 
@@ -24,18 +26,24 @@ stages:
   jobs:
   - job: Build
     steps:
-    - task: DotNetCoreCLI@2
-      inputs:
-        command: restore
-        projects: '$(sourceProject)'
-        feedsToUse: 'select'
-      displayName: "Restore source project's NuGet package(s)"
-    - task: DotNetCoreCLI@2
-      inputs:
-        command: build
-        projects: '$(sourceProject)'
-        arguments: '--configuration $(buildConfiguration)'
-      displayName: "Build source project"
+      - task: UseDotNet@2
+        displayName: Specify Sdk version
+        inputs:
+          version: $(sdkVersion)
+          packageType: sdk
+          includePreviewVersions: $(usePreviewSdk)
+      - task: DotNetCoreCLI@2
+        inputs:
+          command: restore
+          projects: '$(sourceProject)'
+          feedsToUse: 'select'
+        displayName: "Restore source project's NuGet package(s)"
+      - task: DotNetCoreCLI@2
+        inputs:
+          command: build
+          projects: '$(sourceProject)'
+          arguments: '--configuration $(buildConfiguration)'
+        displayName: "Build source project"
 
 - stage: Test_stage
   condition: and(not(failed('Build_stage')), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest'))
@@ -45,6 +53,12 @@ stages:
   jobs:
   - job: Test
     steps:
+      - task: UseDotNet@2
+        displayName: Specify Sdk version
+        inputs:
+          version: $(sdkVersion)
+          packageType: sdk
+          includePreviewVersions: $(usePreviewSdk)
       - task: DotNetCoreCLI@2
         inputs:
           command: test
@@ -68,6 +82,12 @@ stages:
   jobs:
   - job: Publish
     steps:
+      - task: UseDotNet@2
+        displayName: Specify Sdk version
+        inputs:
+          version: $(sdkVersion)
+          packageType: sdk
+          includePreviewVersions: $(usePreviewSdk)
       - task: PowerShell@2
         name: Fetch_Nuget_Ver
         inputs:
