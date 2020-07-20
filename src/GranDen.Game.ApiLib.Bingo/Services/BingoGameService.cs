@@ -55,7 +55,8 @@ namespace GranDen.Game.ApiLib.Bingo.Services
         {
             var games =
                 _bingoGameDbContext.Bingo2dGameInfos
-                    .Where(x => x.Enabled && x.StartTime <= current && (!x.EndTime.HasValue || current < x.EndTime))
+                    .Where(x => x.Enabled).ToList() //TODO: the following time range query is too complex to reside in server side query.
+                    .Where(x => x.StartTime <= current && (!x.EndTime.HasValue || current < x.EndTime))
                     .Select(g => new BingoGameInfoDto
                     {
                         GameName = g.GameName, Enabled = g.Enabled, StartTime = g.StartTime, EndTime = g.EndTime

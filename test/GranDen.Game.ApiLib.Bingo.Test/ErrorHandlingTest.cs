@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.IO;
+using System.Linq;
 using System.Text;
 using GranDen.Game.ApiLib.Bingo.DTO;
 using GranDen.Game.ApiLib.Bingo.Exceptions;
@@ -10,6 +11,7 @@ using GranDen.Game.ApiLib.Bingo.Options;
 using GranDen.Game.ApiLib.Bingo.Repositories.Interfaces;
 using GranDen.Game.ApiLib.Bingo.Services.Interfaces;
 using GranDen.Game.ApiLib.Bingo.ServicesRegistration;
+using GranDen.TimeLib.ClockShaft;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -69,11 +71,66 @@ namespace GranDen.Game.ApiLib.Bingo.Test
         }
 
         [Fact]
+        public void PlayerShouldNotAddBingoRecordsAfterGameExpired()
+        {
+            //Arrange
+            const string testPlayerId = "test_player_1";
+            const string bingoGameName = "testGame";
+
+            using var serviceScope = _rootServiceProvider.CreateScope();
+            var serviceProvider = serviceScope.ServiceProvider;
+            var bingoGameInfoRepo = serviceProvider.GetService<IBingoGameInfoRepo>();
+
+            var bingoGameService = serviceProvider.GetService<IBingoGameService<string>>();
+            var bingoGamePlayerRepo = serviceProvider.GetService<IBingoGamePlayerRepo>();
+
+            ClockWork.ShaftConfigurationFunc = shaft =>
+            {
+                shaft.Backward = true;
+                shaft.ShiftTimeSpan = new TimeSpan(0, 1, 0, 0);
+                return shaft;
+            };
+
+            var startTime = ClockWork.DateTimeOffset.UtcNow;
+            var endTime = startTime + TimeSpan.FromMinutes(30.0);
+
+            //Act
+            var gameId = bingoGameInfoRepo.CreateBingoGame(
+                new BingoGameInfoDto
+                {
+                    GameName = bingoGameName, I18nDisplayKey = "ui_key1", StartTime = startTime, EndTime = endTime
+                },
+                4, 4);
+
+            //Assert
+            Assert.NotEqual(0, gameId);
+            ClockWork.Reset();
+            var ex = Assert.Throws<GameExpiredException>(() =>
+            {
+                bingoGameService.JoinGame(bingoGameName, testPlayerId);
+            });
+
+            Assert.IsType<GameExpiredException>(ex);
+            Assert.Equal(bingoGameName, ex.GameName);
+            
+            var bingoPlayer = bingoGamePlayerRepo.QueryBingoPlayer().Include(p => p.JoinedGames)
+                .FirstOrDefault(p => p.PlayerId == testPlayerId);
+            Assert.Null(bingoPlayer);
+        }
+
+        [Fact(Skip = "TBD")]
+        public void PlayerCanGetPrizeStatusAfterGameExpired()
+        {
+        }
+
+        [Fact]
         public void NotCreatedGame_Call_GetAchievedBingoPrizes_Cause_GameNotExistException()
         {
            //Arrange
            const string bingoGameName = "testGame";
-           var bingoGameService = _rootServiceProvider.GetService<IBingoGameService<string>>();
+           using var serviceScope = _rootServiceProvider.CreateScope();
+           var serviceProvider = serviceScope.ServiceProvider;
+           var bingoGameService = serviceProvider.GetService<IBingoGameService<string>>();
            
            //Assert
            var ex = Assert.Throws<GameNotExistException>(() =>
@@ -91,7 +148,9 @@ namespace GranDen.Game.ApiLib.Bingo.Test
         {
            //Arrange
            const string bingoGameName = "testGame";
-           var bingoGameService = _rootServiceProvider.GetService<IBingoGameService<string>>();
+           using var serviceScope = _rootServiceProvider.CreateScope();
+           var serviceProvider = serviceScope.ServiceProvider;
+           var bingoGameService = serviceProvider.GetService<IBingoGameService<string>>();
            
            //Assert
            var ex = Assert.Throws<GameNotExistException>(() =>
@@ -109,7 +168,9 @@ namespace GranDen.Game.ApiLib.Bingo.Test
         {
            //Arrange
            const string bingoGameName = "testGame";
-           var bingoGameService = _rootServiceProvider.GetService<IBingoGameService<string>>();
+           using var serviceScope = _rootServiceProvider.CreateScope();
+           var serviceProvider = serviceScope.ServiceProvider;
+           var bingoGameService = serviceProvider.GetService<IBingoGameService<string>>();
            
            //Assert
            var ex = Assert.Throws<GameNotExistException>(() =>
@@ -127,7 +188,9 @@ namespace GranDen.Game.ApiLib.Bingo.Test
         {
             //Arrange
             const string testPlayerId = "test_player_1";
-            var bingoGameService = _rootServiceProvider.GetService<IBingoGameService<string>>();
+            using var serviceScope = _rootServiceProvider.CreateScope();
+            var serviceProvider = serviceScope.ServiceProvider;
+            var bingoGameService = serviceProvider.GetService<IBingoGameService<string>>();
 
             //Assert
             var ex = Assert.Throws<PlayerNotJoinedGameException>(() =>
@@ -146,7 +209,9 @@ namespace GranDen.Game.ApiLib.Bingo.Test
         {
             //Arrange
             const string testPlayerId = "test_player_1";
-            var bingoGameService = _rootServiceProvider.GetService<IBingoGameService<string>>();
+            using var serviceScope = _rootServiceProvider.CreateScope();
+            var serviceProvider = serviceScope.ServiceProvider;
+            var bingoGameService = serviceProvider.GetService<IBingoGameService<string>>();
 
             //Assert
             var ex = Assert.Throws<PlayerNotJoinedGameException>(() =>
@@ -165,7 +230,9 @@ namespace GranDen.Game.ApiLib.Bingo.Test
         {
             //Arrange
             const string testPlayerId = "test_player_1";
-            var bingoGameService = _rootServiceProvider.GetService<IBingoGameService<string>>();
+            using var serviceScope = _rootServiceProvider.CreateScope();
+            var serviceProvider = serviceScope.ServiceProvider;
+            var bingoGameService = serviceProvider.GetService<IBingoGameService<string>>();
 
             //Assert
             var ex = Assert.Throws<PlayerNotJoinedGameException>(() =>
