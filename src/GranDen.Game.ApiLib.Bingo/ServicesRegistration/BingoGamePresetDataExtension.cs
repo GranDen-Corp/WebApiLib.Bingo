@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using GranDen.Game.ApiLib.Bingo.DTO;
@@ -25,7 +25,7 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
         public static IServiceCollection ConfigPresetBingoGameData(this IServiceCollection serviceCollection,
             BingoGameOption bingoGameOption)
         {
-            var bingoGameInfoDtos = bingoGameOption.Select(o =>
+            var bingoGameInfoDtos = bingoGameOption.Where(o => o.Preset).Select(o =>
                 new BingoGameInfoDto
                 {
                     GameName = o.GameName,

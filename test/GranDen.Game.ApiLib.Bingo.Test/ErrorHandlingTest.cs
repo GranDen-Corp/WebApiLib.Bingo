@@ -33,6 +33,13 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             ""GameName"" : ""DemoGame"",
             ""GameTableKey"" : ""game_table_1"",
             ""Width"" : 3,
+            ""Height"" : 3,
+            ""Preset"" : true
+        },
+        {
+            ""GameName"" : ""testGame"",
+            ""GameTableKey"" : ""game_table_1"",
+            ""Width"" : 3,
             ""Height"" : 3
         }
     ],
@@ -61,7 +68,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
         private readonly DbConnection _connection;
         private readonly IConfigurationRoot _configuration;
         private readonly ServiceProvider _rootServiceProvider;
-        
+
         public ErrorHandlingTest()
         {
             _connection = CreateInMemoryDatabase();
@@ -100,7 +107,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
                 {
                     GameName = bingoGameName, I18nDisplayKey = "ui_key1", StartTime = startTime, EndTime = endTime
                 },
-                4, 4);
+                3, 3);
 
             //Assert
             Assert.NotEqual(0, gameId);
@@ -112,75 +119,195 @@ namespace GranDen.Game.ApiLib.Bingo.Test
 
             Assert.IsType<GameExpiredException>(ex);
             Assert.Equal(bingoGameName, ex.GameName);
-            
+
             var bingoPlayer = bingoGamePlayerRepo.QueryBingoPlayer().Include(p => p.JoinedGames)
                 .FirstOrDefault(p => p.PlayerId == testPlayerId);
             Assert.Null(bingoPlayer);
         }
 
-        [Fact(Skip = "TBD")]
+        [Fact]
         public void PlayerCanGetPrizeStatusAfterGameExpired()
         {
+            //Arrange
+            const string testPlayer1 = "test_player_1";
+            const string testPlayer2 = "test_player_2";
+            const string bingoGameName = "testGame";
+
+            using var serviceScope = _rootServiceProvider.CreateScope();
+            var serviceProvider = serviceScope.ServiceProvider;
+            var bingoGameInfoRepo = serviceProvider.GetService<IBingoGameInfoRepo>();
+
+            var bingoGameService = serviceProvider.GetService<IBingoGameService<string>>();
+
+            ClockWork.ShaftConfigurationFunc = shaft =>
+            {
+                shaft.Backward = true;
+                shaft.ShiftTimeSpan = new TimeSpan(0, 1, 0, 0);
+                return shaft;
+            };
+
+            var startTime = ClockWork.DateTimeOffset.UtcNow;
+            var endTime = startTime + TimeSpan.FromMinutes(30.0);
+
+            var gameId = bingoGameInfoRepo.CreateBingoGame(
+                new BingoGameInfoDto
+                {
+                    GameName = bingoGameName, I18nDisplayKey = "ui_key1", StartTime = startTime, EndTime = endTime
+                },
+                3, 3);
+
+            Assert.NotEqual(0, gameId);
+
+            Assert.True(bingoGameService.JoinGame(bingoGameName, testPlayer1));
+            Assert.True(bingoGameService.MarkBingoPoint(bingoGameName, testPlayer1, (0, 0), ClockWork.DateTimeOffset.UtcNow));
+            Assert.True(bingoGameService.MarkBingoPoint(bingoGameName, testPlayer1, (0, 1), ClockWork.DateTimeOffset.UtcNow));
+            Assert.True(bingoGameService.MarkBingoPoint(bingoGameName, testPlayer1, (0, 2), ClockWork.DateTimeOffset.UtcNow));
+            Assert.True(bingoGameService.MarkBingoPoint(bingoGameName, testPlayer1, (1, 1), ClockWork.DateTimeOffset.UtcNow));
+            Assert.True(bingoGameService.MarkBingoPoint(bingoGameName, testPlayer1, (2, 2), ClockWork.DateTimeOffset.UtcNow));
+
+            //Act
+            ClockWork.Reset();
+
+            //Assert
+            var ex = Assert.Throws<GameExpiredException>(() =>
+            {
+                bingoGameService.JoinGame(bingoGameName, testPlayer2);
+            });
+
+            Assert.IsType<GameExpiredException>(ex);
+            Assert.Equal(bingoGameName, ex.GameName);
+
+            var markedPoints = bingoGameService.GetPlayerBingoPointStatus(bingoGameName, testPlayer1);
+            Assert.Collection(markedPoints,
+                point2D =>
+                {
+                    var (x, y, marked) = point2D;
+                    Assert.Equal(0, x);
+                    Assert.Equal(0, y);
+                    Assert.True(marked);
+                },
+                point2D =>
+                {
+                    var (x, y, marked) = point2D;
+                    Assert.Equal(0, x);
+                    Assert.Equal(1, y);
+                    Assert.True(marked);
+                },
+                point2D =>
+                {
+                    var (x, y, marked) = point2D;
+                    Assert.Equal(0, x);
+                    Assert.Equal(2, y);
+                    Assert.True(marked);
+                },
+                point2D =>
+                {
+                    var (x, y, marked) = point2D;
+                    Assert.Equal(1, x);
+                    Assert.Equal(0, y);
+                    Assert.False(marked);
+                },
+                point2D =>
+                {
+                    var (x, y, marked) = point2D;
+                    Assert.Equal(1, x);
+                    Assert.Equal(1, y);
+                    Assert.True(marked);
+                },
+                point2D =>
+                {
+                    var (x, y, marked) = point2D;
+                    Assert.Equal(1, x);
+                    Assert.Equal(2, y);
+                    Assert.False(marked);
+                },
+                point2D =>
+                {
+                    var (x, y, marked) = point2D;
+                    Assert.Equal(2, x);
+                    Assert.Equal(0, y);
+                    Assert.False(marked);
+                },
+                point2D =>
+                {
+                    var (x, y, marked) = point2D;
+                    Assert.Equal(2, x);
+                    Assert.Equal(1, y);
+                    Assert.False(marked);
+                },
+                point2D =>
+                {
+                    var (x, y, marked) = point2D;
+                    Assert.Equal(2, x);
+                    Assert.Equal(2, y);
+                    Assert.True(marked);
+                }
+            );
+            var bingoPrizes = bingoGameService.GetAchievedBingoPrizes(bingoGameName, testPlayer1);
+            Assert.Collection(bingoPrizes,
+                prizeName => Assert.Equal("Vertical Line1", prizeName),
+                prizeName => Assert.Equal("Diagonal Line1", prizeName)
+            );
         }
 
         [Fact]
         public void NotCreatedGame_Call_GetAchievedBingoPrizes_Cause_GameNotExistException()
         {
-           //Arrange
-           const string bingoGameName = "testGame";
-           using var serviceScope = _rootServiceProvider.CreateScope();
-           var serviceProvider = serviceScope.ServiceProvider;
-           var bingoGameService = serviceProvider.GetService<IBingoGameService<string>>();
-           
-           //Assert
-           var ex = Assert.Throws<GameNotExistException>(() =>
-           {
-               //Act
-               bingoGameService.GetAchievedBingoPrizes(bingoGameName, "test_player_id");
-           });
-           
-           Assert.IsType<GameNotExistException>(ex);
-           Assert.Equal(bingoGameName, ex.GameName);
+            //Arrange
+            const string bingoGameName = "testGame";
+            using var serviceScope = _rootServiceProvider.CreateScope();
+            var serviceProvider = serviceScope.ServiceProvider;
+            var bingoGameService = serviceProvider.GetService<IBingoGameService<string>>();
+
+            //Assert
+            var ex = Assert.Throws<GameNotExistException>(() =>
+            {
+                //Act
+                bingoGameService.GetAchievedBingoPrizes(bingoGameName, "test_player_id");
+            });
+
+            Assert.IsType<GameNotExistException>(ex);
+            Assert.Equal(bingoGameName, ex.GameName);
         }
 
         [Fact]
         public void NotCreatedGame_Call_GetPlayerBingoPointStatus_Cause_GameNotExistException()
         {
-           //Arrange
-           const string bingoGameName = "testGame";
-           using var serviceScope = _rootServiceProvider.CreateScope();
-           var serviceProvider = serviceScope.ServiceProvider;
-           var bingoGameService = serviceProvider.GetService<IBingoGameService<string>>();
-           
-           //Assert
-           var ex = Assert.Throws<GameNotExistException>(() =>
-           {
-               //Act
-               bingoGameService.GetPlayerBingoPointStatus(bingoGameName, "test_player_id");
-           });
-           
-           Assert.IsType<GameNotExistException>(ex);
-           Assert.Equal(bingoGameName, ex.GameName);
+            //Arrange
+            const string bingoGameName = "testGame";
+            using var serviceScope = _rootServiceProvider.CreateScope();
+            var serviceProvider = serviceScope.ServiceProvider;
+            var bingoGameService = serviceProvider.GetService<IBingoGameService<string>>();
+
+            //Assert
+            var ex = Assert.Throws<GameNotExistException>(() =>
+            {
+                //Act
+                bingoGameService.GetPlayerBingoPointStatus(bingoGameName, "test_player_id");
+            });
+
+            Assert.IsType<GameNotExistException>(ex);
+            Assert.Equal(bingoGameName, ex.GameName);
         }
-        
+
         [Fact]
         public void NotCreatedGame_Call_MarkBingoPoint_Cause_GameNotExistException()
         {
-           //Arrange
-           const string bingoGameName = "testGame";
-           using var serviceScope = _rootServiceProvider.CreateScope();
-           var serviceProvider = serviceScope.ServiceProvider;
-           var bingoGameService = serviceProvider.GetService<IBingoGameService<string>>();
-           
-           //Assert
-           var ex = Assert.Throws<GameNotExistException>(() =>
-           {
-               //Act
-               bingoGameService.MarkBingoPoint(bingoGameName, "test_player_id", (0, 0), DateTimeOffset.Now);
-           });
-           
-           Assert.IsType<GameNotExistException>(ex);
-           Assert.Equal(bingoGameName, ex.GameName);
+            //Arrange
+            const string bingoGameName = "testGame";
+            using var serviceScope = _rootServiceProvider.CreateScope();
+            var serviceProvider = serviceScope.ServiceProvider;
+            var bingoGameService = serviceProvider.GetService<IBingoGameService<string>>();
+
+            //Assert
+            var ex = Assert.Throws<GameNotExistException>(() =>
+            {
+                //Act
+                bingoGameService.MarkBingoPoint(bingoGameName, "test_player_id", (0, 0), DateTimeOffset.Now);
+            });
+
+            Assert.IsType<GameNotExistException>(ex);
+            Assert.Equal(bingoGameName, ex.GameName);
         }
 
         [Fact]
@@ -245,6 +372,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             Assert.Equal(testPlayerId, ex.PlayerId);
             Assert.Equal(PresetBingoGameName, ex.GameName);
         }
+
         #region Environment Setup
 
         private static IConfigurationRoot InitConfiguration()

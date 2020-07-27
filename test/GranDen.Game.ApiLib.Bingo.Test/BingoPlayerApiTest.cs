@@ -31,7 +31,8 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             ""GameName"" : ""DemoGame"",
             ""GameTableKey"" : ""game_1"",
             ""Width"" : 4,
-            ""Height"" : 4
+            ""Height"" : 4,
+            ""Preset"" : true
         }
     ],
     ""GameTable"" : [
