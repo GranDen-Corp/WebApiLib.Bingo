@@ -12,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
 {
     /// <summary>
-    /// Extension method for add preset bingo game data
+    /// Extension methods for add preset bingo game data
     /// </summary>
     public static class BingoGamePresetDataExtension
     {

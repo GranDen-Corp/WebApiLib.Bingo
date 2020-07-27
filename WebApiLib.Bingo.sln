@@ -11,11 +11,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{C191EC8D-1
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GranDen.Game.ApiLib.Bingo.Test", "test\GranDen.Game.ApiLib.Bingo.Test\GranDen.Game.ApiLib.Bingo.Test.csproj", "{A464BC7F-6274-41F0-B9CD-BEB76C37E9D5}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{71CC297E-B1F2-4B34-B629-A1AB2E610DA1}"
-	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
