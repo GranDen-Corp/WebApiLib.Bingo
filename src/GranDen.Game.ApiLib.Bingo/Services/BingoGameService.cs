@@ -55,7 +55,8 @@ namespace GranDen.Game.ApiLib.Bingo.Services
         {
             var games =
                 _bingoGameDbContext.Bingo2dGameInfos
-                    .Where(x => x.Enabled).ToList() //TODO: the following time range query is too complex to reside in server side query.
+                    .Where(x => x.Enabled)
+                    .ToList() //TODO: the following time range query is too complex to reside in server side query.
                     .Where(x => x.StartTime <= current && (!x.EndTime.HasValue || current < x.EndTime))
                     .Select(g => new BingoGameInfoDto
                     {
@@ -134,7 +135,7 @@ namespace GranDen.Game.ApiLib.Bingo.Services
         }
 
         /// <inheritdoc />
-        public ICollection<string> GetAchievedBingoPrizes(string gameName, string playerId)
+        public ICollection<string> GetAchievedBingoPrizes(string gameName, string playerId, string tableKey = null)
         {
             var game = _bingoGameInfoRepo.GetByName(gameName);
 
@@ -143,19 +144,23 @@ namespace GranDen.Game.ApiLib.Bingo.Services
                 throw new GameNotExistException(gameName);
             }
 
-            var bingoGameSetting = _bingoGameOptionDelegate.CurrentValue.FirstOrDefault(g => g.GameName == gameName);
-            if (bingoGameSetting == null)
+            if (tableKey == null)
             {
-                throw new GameSettingNotFoundException(gameName);
+                var bingoGameSetting = _bingoGameOptionDelegate.CurrentValue.FirstOrDefault(g => g.GameName == gameName);
+                if (bingoGameSetting == null)
+                {
+                    throw new GameSettingNotFoundException(gameName);
+                }
+
+                tableKey = bingoGameSetting.GameTableKey;
             }
 
             var gameTableSetting =
-                _bingoGameTableOptionDelegate.CurrentValue.FirstOrDefault(t =>
-                    t.GameTableKey == bingoGameSetting.GameTableKey);
+                _bingoGameTableOptionDelegate.CurrentValue.FirstOrDefault(t => t.GameTableKey == tableKey);
 
             if (gameTableSetting == null)
             {
-                throw new GameTableSettingNotfoundException(gameName, bingoGameSetting.GameTableKey);
+                throw new GameTableSettingNotfoundException(gameName, tableKey);
             }
 
             var bingoPoints = _bingoPointRepo.QueryBingoPoints(gameName, playerId).ToList();

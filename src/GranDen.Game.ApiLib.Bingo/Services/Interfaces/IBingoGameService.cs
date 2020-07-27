@@ -58,7 +58,8 @@ namespace GranDen.Game.ApiLib.Bingo.Services.Interfaces
         /// </summary>
         /// <param name="gameName"></param>
         /// <param name="playerId"></param>
+        /// <param name="tableKey"></param>
         /// <returns></returns>
-        ICollection<T> GetAchievedBingoPrizes(string gameName, string playerId);
+        ICollection<T> GetAchievedBingoPrizes(string gameName, string playerId, string tableKey = null);
     }
 }

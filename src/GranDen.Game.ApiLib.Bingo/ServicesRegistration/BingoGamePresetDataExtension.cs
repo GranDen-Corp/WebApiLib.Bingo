@@ -62,7 +62,7 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
         public static IServiceProvider InitPresetBingoGameData(this IServiceProvider serviceProvider,
             BingoGameOption bingoGameOption)
         {
-            var gameInfoDtos = bingoGameOption.Select(o =>
+            var gameInfoDtos = bingoGameOption.Where(o => o.Preset).Select(o =>
                 new BingoGameInfoDto
                 {
                     GameName = o.GameName,
