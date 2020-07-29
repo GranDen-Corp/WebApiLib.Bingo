@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -55,5 +55,10 @@ namespace GranDen.Game.ApiLib.Bingo.Options
         /// Bingo game end moment
         /// </summary>
         public DateTimeOffset? GameEnd { get; set; }
+
+        /// <summary>
+        /// Set true for this game being pre-deploy when calling <c>CreatePresetBingoGames()</c>
+        /// </summary>
+        public bool Preset { get; set; } = false;
     }
 }

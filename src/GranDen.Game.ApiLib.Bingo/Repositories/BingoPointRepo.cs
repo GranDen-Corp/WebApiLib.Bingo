@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using GranDen.Game.ApiLib.Bingo.Exceptions;
 using GranDen.Game.ApiLib.Bingo.Models;
 using GranDen.Game.ApiLib.Bingo.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -63,16 +64,19 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
         /// <inheritdoc />
         public IQueryable<BingoPoint> QueryBingoPoints(string bingoGameName, string bingoPlayerId)
         {
-            var game = _bingoGameInfoRepo.QueryBingoGames().AsNoTracking().Include(g => g.JoinedPlayers)
-                .FirstOrDefault(g =>
-                    g.GameName == bingoGameName && g.JoinedPlayers.Any(p => p.PlayerId == bingoPlayerId));
+            var game = _bingoGameInfoRepo.QueryBingoGames().AsNoTracking().FirstOrDefault(g => g.GameName == bingoGameName );
+
+            if (game == null)
+            {
+                throw new GameNotExistException(bingoGameName);
+            }
 
             var player = _bingoGameDbContext.BingoPlayerInfos.AsNoTracking()
                 .FirstOrDefault(p => p.PlayerId == bingoPlayerId);
 
-            if (game == null || player == null)
+            if (player == null)
             {
-                throw new Exception($"Bingo Game {bingoGameName} not exist or player {bingoPlayerId} not joined.");
+                throw new PlayerNotJoinedGameException(bingoGameName, bingoPlayerId);
             }
 
             return _bingoGameDbContext.BingoPoints.Where(p => p.BelongingGame == game && p.BelongingPlayer == player);

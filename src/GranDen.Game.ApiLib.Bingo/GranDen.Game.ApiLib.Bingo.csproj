@@ -31,14 +31,15 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="GranDen.GameLib.Bingo" Version="1.0.5" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.5" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="3.1.5" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.5" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.5" />
-        <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.5" />
-        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.5" />
-        <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="3.1.5" />
+        <PackageReference Include="GranDen.GameLib.Bingo" Version="1.0.7" />
+        <PackageReference Include="GranDen.TimeLib.ClockShaft" Version="1.0.1" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.6" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="3.1.6" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.6" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.6" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.6" />
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.6" />
+        <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="3.1.6" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
     </ItemGroup>
 

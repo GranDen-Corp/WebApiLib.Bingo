@@ -1,4 +1,5 @@
 ﻿using System;
+using GranDen.TimeLib.ClockShaft;
 
 namespace GranDen.Game.ApiLib.Bingo.DTO
 {
@@ -20,6 +21,6 @@ namespace GranDen.Game.ApiLib.Bingo.DTO
         /// <summary>
         /// The moment Mark point achieved 
         /// </summary>
-        public DateTimeOffset ClearTime { get; set; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset ClearTime { get; set; } = ClockWork.DateTimeOffset.UtcNow;
     }
 }

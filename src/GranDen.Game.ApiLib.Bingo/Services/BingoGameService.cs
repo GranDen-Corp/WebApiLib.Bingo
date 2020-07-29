@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using GranDen.Game.ApiLib.Bingo.DTO;
+using GranDen.Game.ApiLib.Bingo.Exceptions;
 using GranDen.Game.ApiLib.Bingo.Models;
 using GranDen.Game.ApiLib.Bingo.Options;
 using GranDen.Game.ApiLib.Bingo.Repositories.Interfaces;
 using GranDen.Game.ApiLib.Bingo.Services.Interfaces;
 using GranDen.GameLib.Bingo;
+using GranDen.TimeLib.ClockShaft;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -53,7 +55,9 @@ namespace GranDen.Game.ApiLib.Bingo.Services
         {
             var games =
                 _bingoGameDbContext.Bingo2dGameInfos
-                    .Where(x => x.Enabled && x.StartTime <= current && (!x.EndTime.HasValue || current < x.EndTime))
+                    .Where(x => x.Enabled)
+                    .ToList() //TODO: the following time range query is too complex to reside in server side query.
+                    .Where(x => x.StartTime <= current && (!x.EndTime.HasValue || current < x.EndTime))
                     .Select(g => new BingoGameInfoDto
                     {
                         GameName = g.GameName, Enabled = g.Enabled, StartTime = g.StartTime, EndTime = g.EndTime
@@ -69,13 +73,17 @@ namespace GranDen.Game.ApiLib.Bingo.Services
 
             if (game == null)
             {
-                var bingoGameInfoDto = new BingoGameInfoDto
-                {
-                    GameName = gameName, Enabled = true, StartTime = DateTimeOffset.UtcNow
-                };
-                _bingoGameInfoRepo.CreateBingoGame(bingoGameInfoDto);
+                throw new GameNotExistException(gameName);
+            }
 
-                game = _bingoGameInfoRepo.GetByName(gameName);
+            if (!game.Enabled)
+            {
+                throw new GameDisabledException(gameName);
+            }
+
+            if (game.EndTime.HasValue && game.EndTime <= ClockWork.DateTimeOffset.UtcNow)
+            {
+                throw new GameExpiredException(gameName);
             }
 
             if (game.JoinedPlayers.Any(p => p.PlayerId == playerId))
@@ -127,21 +135,32 @@ namespace GranDen.Game.ApiLib.Bingo.Services
         }
 
         /// <inheritdoc />
-        public ICollection<string> GetAchievedBingoPrizes(string gameName, string playerId)
+        public ICollection<string> GetAchievedBingoPrizes(string gameName, string playerId, string tableKey = null)
         {
-            var bingoGameSetting = _bingoGameOptionDelegate.CurrentValue.FirstOrDefault(g => g.GameName == gameName);
-            if (bingoGameSetting == null)
+            var game = _bingoGameInfoRepo.GetByName(gameName);
+
+            if (game == null)
             {
-                throw new Exception($"Bingo game {gameName} setting not found.");
+                throw new GameNotExistException(gameName);
+            }
+
+            if (tableKey == null)
+            {
+                var bingoGameSetting = _bingoGameOptionDelegate.CurrentValue.FirstOrDefault(g => g.GameName == gameName);
+                if (bingoGameSetting == null)
+                {
+                    throw new GameSettingNotFoundException(gameName);
+                }
+
+                tableKey = bingoGameSetting.GameTableKey;
             }
 
             var gameTableSetting =
-                _bingoGameTableOptionDelegate.CurrentValue.FirstOrDefault(t =>
-                    t.GameTableKey == bingoGameSetting.GameTableKey);
+                _bingoGameTableOptionDelegate.CurrentValue.FirstOrDefault(t => t.GameTableKey == tableKey);
 
-            if (gameTableSetting == null || !gameTableSetting.PrizeLines.Any())
+            if (gameTableSetting == null)
             {
-                throw new Exception($"Bingo game table {bingoGameSetting.GameTableKey} not found or no prize settings exist.");
+                throw new GameTableSettingNotfoundException(gameName, tableKey);
             }
 
             var bingoPoints = _bingoPointRepo.QueryBingoPoints(gameName, playerId).ToList();
