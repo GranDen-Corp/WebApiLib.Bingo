@@ -61,5 +61,14 @@ namespace GranDen.Game.ApiLib.Bingo.Services.Interfaces
         /// <param name="tableKey"></param>
         /// <returns></returns>
         ICollection<T> GetAchievedBingoPrizes(string gameName, string playerId, string tableKey = null);
+
+        /// <summary>
+        /// Reset a player's all bingo points status of a certain Bingo Game
+        /// </summary>
+        /// <param name="gameName"></param>
+        /// <param name="playerId"></param>
+        /// <returns></returns>
+        bool ResetMarkBingoPoint(string gameName, string playerId);
+        
     }
 }

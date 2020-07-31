@@ -143,6 +143,38 @@ namespace GranDen.Game.ApiLib.Bingo.Test
         }
 
         [Fact]
+        public void CanResetPLayerMarked2DPointStatus()
+        {
+            
+            //Arrange
+            const string testPlayerId = "test_player_1";
+            const string testGeoPointId = "geoPoint_07";
+
+            using var serviceScope = _rootServiceProvider.CreateScope();
+            var serviceProvider = serviceScope.ServiceProvider;
+
+            var bingoGameService = serviceProvider.GetService<IBingoGameService<string>>();
+
+            Assert.True(bingoGameService.JoinGame(PresetBingoGameName, testPlayerId));
+            Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 0, Y = 0}));
+            Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 1, Y = 1}));
+            Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 1, Y = 2}));
+            Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 2, Y = 2}));
+            Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 3, Y = 3}));
+            
+           //Act
+           Assert.True(bingoGameService.ResetMarkBingoPoint(PresetBingoGameName, testPlayerId));
+           
+           //Assert
+           var markedPoints = bingoGameService.GetPlayerBingoPointStatus(PresetBingoGameName, testPlayerId).OrderBy(p => p.X).ThenBy(p => p.Y).ToList();
+
+           foreach (var markedPoint in markedPoints)
+           {
+               Assert.False(markedPoint.Marked);
+           }
+        }
+
+        [Fact]
         public void PlayerCanAddBingoPointStatusDuringValidGamePeriod()
         {
             //Arrange

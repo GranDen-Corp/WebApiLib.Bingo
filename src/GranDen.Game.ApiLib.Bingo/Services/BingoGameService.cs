@@ -175,5 +175,11 @@ namespace GranDen.Game.ApiLib.Bingo.Services
             var markPoints = bingoPoints.Select(b => b.MarkPoint).ToList();
             return bingo.Decide(markPoints);
         }
+
+        /// <inheritdoc />
+        public bool ResetMarkBingoPoint(string gameName, string playerId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
