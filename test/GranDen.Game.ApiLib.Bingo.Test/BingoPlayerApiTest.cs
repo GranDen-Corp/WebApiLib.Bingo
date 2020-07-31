@@ -5,11 +5,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using GranDen.Game.ApiLib.Bingo.DTO;
+using GranDen.Game.ApiLib.Bingo.Exceptions;
 using GranDen.Game.ApiLib.Bingo.Models;
 using GranDen.Game.ApiLib.Bingo.Options;
 using GranDen.Game.ApiLib.Bingo.Repositories.Interfaces;
 using GranDen.Game.ApiLib.Bingo.Services.Interfaces;
 using GranDen.Game.ApiLib.Bingo.ServicesRegistration;
+using GranDen.TimeLib.ClockShaft;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -80,27 +82,27 @@ namespace GranDen.Game.ApiLib.Bingo.Test
 
             using var serviceScope = _rootServiceProvider.CreateScope();
             var serviceProvider = serviceScope.ServiceProvider;
-            
+
             var bingoGameInfoRepo = serviceProvider.GetService<IBingoGameInfoRepo>();
 
-            var bingoGameService = serviceProvider.GetService<IBingoGameService<string>>();
+            var bingoGameService = serviceProvider.GetService<I2DBingoGameService>();
             var bingoGamePlayerRepo = serviceProvider.GetService<IBingoGamePlayerRepo>();
 
             //Act
             var gameId = bingoGameInfoRepo.CreateBingoGame(
                 new BingoGameInfoDto
                 {
-                    GameName = bingoGameName, I18nDisplayKey = "ui_key1", StartTime = DateTimeOffset.UtcNow
+                    GameName = bingoGameName, I18nDisplayKey = "ui_key1", StartTime = ClockWork.DateTimeOffset.UtcNow
                 },
                 4, 4);
 
-            var attendableGames = bingoGameService.GetAttendableGames(DateTimeOffset.UtcNow);
+            var attendableGames = bingoGameService.GetAttendableGames(ClockWork.DateTimeOffset.UtcNow);
 
             var joined = bingoGameService.JoinGame(bingoGameName, testPlayerId);
 
             //Assert
             Assert.NotEmpty(attendableGames);
-            
+
             Assert.NotEqual(0, gameId);
             Assert.True(joined);
 
@@ -122,7 +124,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             using var serviceScope = _rootServiceProvider.CreateScope();
             var serviceProvider = serviceScope.ServiceProvider;
 
-            var bingoGameService = serviceProvider.GetService<IBingoGameService<string>>();
+            var bingoGameService = serviceProvider.GetService<I2DBingoGameService>();
 
             Assert.True(bingoGameService.JoinGame(PresetBingoGameName, testPlayerId));
             Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 1, Y = 2}));
@@ -145,15 +147,14 @@ namespace GranDen.Game.ApiLib.Bingo.Test
         [Fact]
         public void CanResetPLayerMarked2DPointStatus()
         {
-            
             //Arrange
             const string testPlayerId = "test_player_1";
-            const string testGeoPointId = "geoPoint_07";
 
             using var serviceScope = _rootServiceProvider.CreateScope();
             var serviceProvider = serviceScope.ServiceProvider;
 
-            var bingoGameService = serviceProvider.GetService<IBingoGameService<string>>();
+            var bingoGameService = serviceProvider.GetService<I2DBingoGameService>();
+            var bingoPointRepo = serviceProvider.GetService<IBingoPointRepo>();
 
             Assert.True(bingoGameService.JoinGame(PresetBingoGameName, testPlayerId));
             Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 0, Y = 0}));
@@ -161,17 +162,19 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 1, Y = 2}));
             Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 2, Y = 2}));
             Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 3, Y = 3}));
-            
-           //Act
-           Assert.True(bingoGameService.ResetMarkBingoPoint(PresetBingoGameName, testPlayerId));
-           
-           //Assert
-           var markedPoints = bingoGameService.GetPlayerBingoPointStatus(PresetBingoGameName, testPlayerId).OrderBy(p => p.X).ThenBy(p => p.Y).ToList();
 
-           foreach (var markedPoint in markedPoints)
-           {
-               Assert.False(markedPoint.Marked);
-           }
+            //Act
+            Assert.True(bingoGameService.ResetMarkBingoPoint(PresetBingoGameName, testPlayerId));
+
+            //Assert
+            var bingoPoints = bingoPointRepo.QueryBingoPoints(PresetBingoGameName, testPlayerId).OrderBy(p => p.MarkPoint.X)
+                .ThenBy(p => p.MarkPoint.Y).ToList();
+
+            foreach (var markedPoint in bingoPoints)
+            {
+                Assert.False(markedPoint.MarkPoint.Marked);
+                Assert.Null(markedPoint.ClearTime);
+            }
         }
 
         [Fact]
@@ -183,7 +186,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             using var serviceScope = _rootServiceProvider.CreateScope();
             var serviceProvider = serviceScope.ServiceProvider;
 
-            var bingoGameService = serviceProvider.GetService<IBingoGameService<string>>();
+            var bingoGameService = serviceProvider.GetService<I2DBingoGameService>();
 
             Assert.True(bingoGameService.JoinGame(PresetBingoGameName, testPlayerId));
 
@@ -262,7 +265,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             using var serviceScope = _rootServiceProvider.CreateScope();
             var serviceProvider = serviceScope.ServiceProvider;
 
-            var bingoGameService = serviceProvider.GetService<IBingoGameService<string>>();
+            var bingoGameService = serviceProvider.GetService<I2DBingoGameService>();
 
             Assert.True(bingoGameService.JoinGame(PresetBingoGameName, testPlayerId));
             Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, (0, 0), DateTimeOffset.UtcNow));
@@ -294,6 +297,49 @@ namespace GranDen.Game.ApiLib.Bingo.Test
                 {
                     Assert.Equal("Diagonal Line1", m);
                 });
+        }
+
+        [Fact]
+        public void PlayerLeaveGameWillClearBingoGameData()
+        {
+            //Arrange
+            const string testPlayerId = "test_player_1";
+
+            using var serviceScope = _rootServiceProvider.CreateScope();
+            var serviceProvider = serviceScope.ServiceProvider;
+
+            var bingoGameInfoRepo = serviceProvider.GetService<IBingoGameInfoRepo>();
+            var bingoGamePlayerRepo = serviceProvider.GetService<IBingoGamePlayerRepo>();
+            var bingoPointRepo = serviceProvider.GetService<IBingoPointRepo>();
+            var bingoGameService = serviceProvider.GetService<I2DBingoGameService>();
+
+            Assert.True(bingoGameService.JoinGame(PresetBingoGameName, testPlayerId));
+            Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, (0, 0), DateTimeOffset.UtcNow));
+            Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, (1, 0), DateTimeOffset.UtcNow));
+            Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, (2, 0), DateTimeOffset.UtcNow));
+            Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, (3, 0), DateTimeOffset.UtcNow));
+
+            //Act
+            var isSuccessfulLeave = bingoGameService.LeaveGame(PresetBingoGameName, testPlayerId);
+
+            //Assert
+            Assert.True(isSuccessfulLeave);
+
+            var bingoGame = bingoGameInfoRepo.QueryBingoGames().Include(g => g.JoinedPlayers)
+                .FirstOrDefault(g => g.GameName == PresetBingoGameName);
+            Assert.NotNull(bingoGame);
+            Assert.True(bingoGame.JoinedPlayers.All(p => p.PlayerId == testPlayerId));
+
+            Assert.Null(bingoGamePlayerRepo.GetBingoGamePlayer(testPlayerId).FirstOrDefault());
+
+            var ex = Assert.Throws<PlayerNotJoinedGameException>(() =>
+            {
+                bingoPointRepo.QueryBingoPoints(PresetBingoGameName, testPlayerId);
+            });
+
+            Assert.IsType<PlayerNotJoinedGameException>(ex);
+            Assert.Equal(PresetBingoGameName, ex.GameName);
+            Assert.Equal(testPlayerId, ex.PlayerId);
         }
 
         #region Environment Setup

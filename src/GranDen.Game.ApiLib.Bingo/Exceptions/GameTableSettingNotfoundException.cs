@@ -8,7 +8,7 @@
         /// <summary>
         /// Game Table key name
         /// </summary>
-        public string GameTableKey { get; private set; }
+        public string GameTableKey { get; }
 
         /// <summary>
         /// Exception class constructor

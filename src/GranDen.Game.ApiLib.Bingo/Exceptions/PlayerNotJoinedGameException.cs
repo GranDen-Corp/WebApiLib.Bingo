@@ -11,12 +11,12 @@ namespace GranDen.Game.ApiLib.Bingo.Exceptions
         /// <summary>
         /// Bingo Game Name
         /// </summary>
-        public string GameName { get; private set; }
+        public string GameName { get;  }
 
         /// <summary>
         /// Player Id
         /// </summary>
-        public string PlayerId { get; private set; }
+        public string PlayerId { get; }
 
         /// <summary>
         /// Exception Class constructor

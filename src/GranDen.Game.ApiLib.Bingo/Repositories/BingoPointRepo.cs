@@ -81,5 +81,20 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
 
             return _bingoGameDbContext.BingoPoints.Where(p => p.BelongingGame == game && p.BelongingPlayer == player);
         }
+
+        /// <inheritdoc />
+        public bool ResetAllBingoPoints(string bingoGameName, string bingoPlayerId)
+        {
+            var bingoPoints = QueryBingoPoints(bingoGameName, bingoPlayerId).ToList();
+
+            foreach (var bingoPoint in bingoPoints)
+            {
+                bingoPoint.ClearTime = null;
+                bingoPoint.MarkPoint.Marked = false;
+                _bingoGameDbContext.BingoPoints.Update(bingoPoint);
+            }
+
+            return _bingoGameDbContext.SaveChanges() >= 0;
+        }
     }
 }
