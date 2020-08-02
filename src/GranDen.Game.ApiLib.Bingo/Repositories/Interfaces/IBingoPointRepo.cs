@@ -25,5 +25,14 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories.Interfaces
         /// <param name="bingoPlayerId"></param>
         /// <returns></returns>
         IQueryable<BingoPoint> QueryBingoPoints(string bingoGameName, string bingoPlayerId);
+
+
+        /// <summary>
+        /// Reset all player's Bingo Game points of a certain Game
+        /// </summary>
+        /// <param name="bingoGameName"></param>
+        /// <param name="bingoPlayerId"></param>
+        /// <returns></returns>
+        public bool ResetAllBingoPoints(string bingoGameName, string bingoPlayerId);
     }
 }

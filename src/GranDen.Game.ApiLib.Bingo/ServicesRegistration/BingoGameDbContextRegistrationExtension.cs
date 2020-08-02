@@ -31,7 +31,7 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
             serviceCollection.AddScoped<IBingoGamePlayerRepo, BingoGamePlayerRepo>();
             serviceCollection.AddScoped<IBingoPointRepo, BingoPointRepo>();
             serviceCollection.AddScoped<IMappingGeoPointsRepo, MappingGeoPointsRepo>();
-            serviceCollection.AddScoped<IBingoGameService<string>, BingoGameService>();
+            serviceCollection.AddScoped<I2DBingoGameService, BingoGameService>();
 
             return serviceCollection;
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using GranDen.Game.ApiLib.Bingo.Exceptions;
 using GranDen.Game.ApiLib.Bingo.Models;
 using GranDen.Game.ApiLib.Bingo.Repositories.Interfaces;
 using GranDen.GameLib.Bingo;
@@ -68,7 +69,7 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
 
                     if (mappingGeoPoint == null)
                     {
-                        throw new Exception($"GeoPoint {geoPointId} not exist.");
+                        throw new GeoPointNotExistException(geoPointId);
                     }
 
                     var pointProjection = new PointProjection
@@ -102,7 +103,7 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
 
             if (bingoGame == null)
             {
-                throw new Exception($"Game {bingoGameName} not exist.");
+                throw new GameNotExistException(bingoGameName);
             }
 
             var player = _bingoGameDbContext.BingoPlayerInfos.Include(p => p.JoinedGames)
@@ -111,7 +112,7 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
 
             if (player == null)
             {
-                throw new Exception($"Player {bingoPlayerId} not exist or not joined in Game {bingoGameName}.");
+                throw new PlayerNotJoinedGameException(bingoGameName, bingoPlayerId);
             }
 
             //NOTE: Should it be able to safely do automatically cascading delete in future version of EF Core?
@@ -129,10 +130,9 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
             }
 
             bingoGame.JoinedPlayers.Remove(player);
+            _bingoGameDbContext.BingoPlayerInfos.Remove(player);
 
-            var updateCount = _bingoGameDbContext.SaveChanges();
-
-            return updateCount > 0;
+            return  _bingoGameDbContext.SaveChanges() > 0;
         }
     }
 }

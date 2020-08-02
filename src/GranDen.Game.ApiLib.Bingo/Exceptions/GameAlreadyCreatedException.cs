@@ -1,15 +1,15 @@
 ﻿namespace GranDen.Game.ApiLib.Bingo.Exceptions
 {
     /// <summary>
-    /// Throws when trying to modify 
+    /// Throws when trying to create Bingo Game that already exist. 
     /// </summary>
-    public class GameDisabledException : AbstractGameException
+    public class GameAlreadyCreatedException : AbstractGameException
     {
         /// <summary>
         /// Exception class constructor
         /// </summary>
         /// <param name="gameName"></param>
-        public GameDisabledException(string gameName) : base($"Game {gameName} disabled")
+        public GameAlreadyCreatedException(string gameName) : base($"Bingo Game {gameName} already exist.")
         {
             GameName = gameName;
         }

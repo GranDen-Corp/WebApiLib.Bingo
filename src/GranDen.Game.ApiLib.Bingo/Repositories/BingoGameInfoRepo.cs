@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using GranDen.Game.ApiLib.Bingo.DTO;
+using GranDen.Game.ApiLib.Bingo.Exceptions;
 using GranDen.Game.ApiLib.Bingo.Models;
 using GranDen.Game.ApiLib.Bingo.Options;
 using GranDen.Game.ApiLib.Bingo.Repositories.Interfaces;
@@ -33,7 +34,7 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
 
             if (existedBingoGame != null)
             {
-                throw new Exception($"Bingo Game {bingoGameInfoDto.GameName} already exist.");
+                throw new GameAlreadyCreatedException(bingoGameInfoDto.GameName);
             }
 
             int width, height;
@@ -64,7 +65,7 @@ namespace GranDen.Game.ApiLib.Bingo.Repositories
 
             if (existedBingoGame == null)
             {
-                throw new Exception($"Bingo Game {bingoGameInfoDto.GameName} hasn't created.");
+                throw new GameNotExistException(bingoGameInfoDto.GameName);
             }
 
             existedBingoGame.I18nDisplayKey = bingoGameInfoDto.I18nDisplayKey;

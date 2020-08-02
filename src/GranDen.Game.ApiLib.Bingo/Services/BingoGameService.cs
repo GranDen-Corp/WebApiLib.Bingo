@@ -15,7 +15,7 @@ using Microsoft.Extensions.Options;
 namespace GranDen.Game.ApiLib.Bingo.Services
 {
     /// <inheritdoc />
-    public class BingoGameService : IBingoGameService<string>
+    public class BingoGameService : I2DBingoGameService
     {
         private readonly BingoGameDbContext _bingoGameDbContext;
         private readonly IBingoGameInfoRepo _bingoGameInfoRepo;
@@ -99,6 +99,20 @@ namespace GranDen.Game.ApiLib.Bingo.Services
         }
 
         /// <inheritdoc />
+        public bool LeaveGame(string gameName, string playerId)
+        {
+            var game = _bingoGameInfoRepo.GetByName(gameName);
+
+            if (game == null)
+            {
+                throw new GameNotExistException(gameName);
+            }
+
+            return game.JoinedPlayers.All(p => p.PlayerId != playerId) ||
+                   _bingoGamePlayerRepo.ResetBingoGamePlayerData(gameName, playerId);
+        }
+
+        /// <inheritdoc />
         public bool MarkBingoPoint(string gameName, string playerId, (int x, int y) point, DateTimeOffset markedTime)
         {
             var (x, y) = point;
@@ -107,7 +121,7 @@ namespace GranDen.Game.ApiLib.Bingo.Services
 
             if (bingoPoint == null)
             {
-                throw new Exception($"No such bingo point ({x}, {y}) for Player {playerId} in Game {gameName}.");
+                throw new BingoPointNotExistException(gameName, playerId, point);
             }
 
             if (bingoPoint.MarkPoint.Marked)
@@ -117,9 +131,8 @@ namespace GranDen.Game.ApiLib.Bingo.Services
 
             bingoPoint.MarkPoint.Marked = true;
             bingoPoint.ClearTime = markedTime;
-            var updateCount = _bingoGameDbContext.SaveChanges();
 
-            return updateCount > 0;
+            return _bingoGameDbContext.SaveChanges() > 0;
         }
 
         /// <inheritdoc />
@@ -174,6 +187,12 @@ namespace GranDen.Game.ApiLib.Bingo.Services
 
             var markPoints = bingoPoints.Select(b => b.MarkPoint).ToList();
             return bingo.Decide(markPoints);
+        }
+
+        /// <inheritdoc />
+        public bool ResetMarkBingoPoint(string gameName, string playerId)
+        {
+            return _bingoPointRepo.ResetAllBingoPoints(gameName, playerId);
         }
     }
 }
