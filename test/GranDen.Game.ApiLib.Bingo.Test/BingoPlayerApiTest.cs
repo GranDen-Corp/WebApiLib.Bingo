@@ -5,11 +5,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using GranDen.Game.ApiLib.Bingo.DTO;
+using GranDen.Game.ApiLib.Bingo.Exceptions;
 using GranDen.Game.ApiLib.Bingo.Models;
 using GranDen.Game.ApiLib.Bingo.Options;
 using GranDen.Game.ApiLib.Bingo.Repositories.Interfaces;
 using GranDen.Game.ApiLib.Bingo.Services.Interfaces;
 using GranDen.Game.ApiLib.Bingo.ServicesRegistration;
+using GranDen.TimeLib.ClockShaft;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -20,6 +22,8 @@ namespace GranDen.Game.ApiLib.Bingo.Test
 {
     public class BingoPlayerApiTest : IDisposable
     {
+        #region Constant Definition
+
         private const string PresetBingoGameName = "DemoGame";
 
         private const string BingoGameOptionJsonStr = @"
@@ -29,7 +33,8 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             ""GameName"" : ""DemoGame"",
             ""GameTableKey"" : ""game_1"",
             ""Width"" : 4,
-            ""Height"" : 4
+            ""Height"" : 4,
+            ""Preset"" : true
         }
     ],
     ""GameTable"" : [
@@ -54,16 +59,17 @@ namespace GranDen.Game.ApiLib.Bingo.Test
 }
 ";
 
+        #endregion
+
         private readonly DbConnection _connection;
-        private IConfigurationRoot _configuration;
-        private ServiceProvider _serviceProvider;
+        private readonly IConfigurationRoot _configuration;
+        private readonly ServiceProvider _rootServiceProvider;
 
         public BingoPlayerApiTest()
         {
             _connection = CreateInMemoryDatabase();
-
-            InitConfiguration();
-            InitServices();
+            _configuration = InitConfiguration();
+            _rootServiceProvider = InitServices();
             PresetData();
         }
 
@@ -73,19 +79,30 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             //Arrange
             const string testPlayerId = "test_player_1";
             const string bingoGameName = "testGame";
-            var bingoGameInfoRepo = _serviceProvider.GetService<IBingoGameInfoRepo>();
 
-            var bingoGameService = _serviceProvider.GetService<IBingoGameService<string>>();
-            var bingoGamePlayerRepo = _serviceProvider.GetService<IBingoGamePlayerRepo>();
+            using var serviceScope = _rootServiceProvider.CreateScope();
+            var serviceProvider = serviceScope.ServiceProvider;
+
+            var bingoGameInfoRepo = serviceProvider.GetService<IBingoGameInfoRepo>();
+
+            var bingoGameService = serviceProvider.GetService<I2DBingoGameService>();
+            var bingoGamePlayerRepo = serviceProvider.GetService<IBingoGamePlayerRepo>();
 
             //Act
             var gameId = bingoGameInfoRepo.CreateBingoGame(
-                new BingoGameInfoDto {GameName = bingoGameName, I18nDisplayKey = "ui_key1", StartTime = DateTimeOffset.UtcNow},
+                new BingoGameInfoDto
+                {
+                    GameName = bingoGameName, I18nDisplayKey = "ui_key1", StartTime = ClockWork.DateTimeOffset.UtcNow
+                },
                 4, 4);
+
+            var attendableGames = bingoGameService.GetAttendableGames(ClockWork.DateTimeOffset.UtcNow);
 
             var joined = bingoGameService.JoinGame(bingoGameName, testPlayerId);
 
             //Assert
+            Assert.NotEmpty(attendableGames);
+
             Assert.NotEqual(0, gameId);
             Assert.True(joined);
 
@@ -104,13 +121,16 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             const string testPlayerId = "test_player_1";
             const string testGeoPointId = "geoPoint_07";
 
-            var bingoGameService = _serviceProvider.GetService<IBingoGameService<string>>();
+            using var serviceScope = _rootServiceProvider.CreateScope();
+            var serviceProvider = serviceScope.ServiceProvider;
+
+            var bingoGameService = serviceProvider.GetService<I2DBingoGameService>();
 
             Assert.True(bingoGameService.JoinGame(PresetBingoGameName, testPlayerId));
             Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 1, Y = 2}));
 
             //Act
-            var bingoPointRepo = _serviceProvider.GetService<IBingoPointRepo>();
+            var bingoPointRepo = _rootServiceProvider.GetService<IBingoPointRepo>();
             var candidateBingoPoints = bingoPointRepo.GetMappedBingoPoint(PresetBingoGameName, testPlayerId, testGeoPointId);
 
             //Assert
@@ -125,12 +145,48 @@ namespace GranDen.Game.ApiLib.Bingo.Test
         }
 
         [Fact]
+        public void CanResetPLayerMarked2DPointStatus()
+        {
+            //Arrange
+            const string testPlayerId = "test_player_1";
+
+            using var serviceScope = _rootServiceProvider.CreateScope();
+            var serviceProvider = serviceScope.ServiceProvider;
+
+            var bingoGameService = serviceProvider.GetService<I2DBingoGameService>();
+            var bingoPointRepo = serviceProvider.GetService<IBingoPointRepo>();
+
+            Assert.True(bingoGameService.JoinGame(PresetBingoGameName, testPlayerId));
+            Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 0, Y = 0}));
+            Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 1, Y = 1}));
+            Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 1, Y = 2}));
+            Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 2, Y = 2}));
+            Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 3, Y = 3}));
+
+            //Act
+            Assert.True(bingoGameService.ResetMarkBingoPoint(PresetBingoGameName, testPlayerId));
+
+            //Assert
+            var bingoPoints = bingoPointRepo.QueryBingoPoints(PresetBingoGameName, testPlayerId).OrderBy(p => p.MarkPoint.X)
+                .ThenBy(p => p.MarkPoint.Y).ToList();
+
+            foreach (var markedPoint in bingoPoints)
+            {
+                Assert.False(markedPoint.MarkPoint.Marked);
+                Assert.Null(markedPoint.ClearTime);
+            }
+        }
+
+        [Fact]
         public void PlayerCanAddBingoPointStatusDuringValidGamePeriod()
         {
             //Arrange
             const string testPlayerId = "test_player_1";
 
-            var bingoGameService = _serviceProvider.GetService<IBingoGameService<string>>();
+            using var serviceScope = _rootServiceProvider.CreateScope();
+            var serviceProvider = serviceScope.ServiceProvider;
+
+            var bingoGameService = serviceProvider.GetService<I2DBingoGameService>();
 
             Assert.True(bingoGameService.JoinGame(PresetBingoGameName, testPlayerId));
 
@@ -167,7 +223,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             );
 
             //Get inner DB data to exam point belonging owner
-            var bingoPointRepo = _serviceProvider.GetService<IBingoPointRepo>();
+            var bingoPointRepo = _rootServiceProvider.GetService<IBingoPointRepo>();
 
             var bingoPoints = bingoPointRepo.QueryBingoPoints(PresetBingoGameName, testPlayerId)
                 .Include(m => m.BelongingGame).Include(m => m.BelongingPlayer)
@@ -206,7 +262,10 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             //Arrange
             const string testPlayerId = "test_player_1";
 
-            var bingoGameService = _serviceProvider.GetService<IBingoGameService<string>>();
+            using var serviceScope = _rootServiceProvider.CreateScope();
+            var serviceProvider = serviceScope.ServiceProvider;
+
+            var bingoGameService = serviceProvider.GetService<I2DBingoGameService>();
 
             Assert.True(bingoGameService.JoinGame(PresetBingoGameName, testPlayerId));
             Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, (0, 0), DateTimeOffset.UtcNow));
@@ -240,25 +299,58 @@ namespace GranDen.Game.ApiLib.Bingo.Test
                 });
         }
 
-        [Fact(Skip = "TBD")]
-        public void PlayerShouldNotAddBingoRecordsAfterGameExpired()
+        [Fact]
+        public void PlayerLeaveGameWillClearBingoGameData()
         {
-        }
+            //Arrange
+            const string testPlayerId = "test_player_1";
 
-        [Fact(Skip = "TBD")]
-        public void PlayerCanGetPrizeStatusAfterGameExpired()
-        {
+            using var serviceScope = _rootServiceProvider.CreateScope();
+            var serviceProvider = serviceScope.ServiceProvider;
+
+            var bingoGameInfoRepo = serviceProvider.GetService<IBingoGameInfoRepo>();
+            var bingoGamePlayerRepo = serviceProvider.GetService<IBingoGamePlayerRepo>();
+            var bingoPointRepo = serviceProvider.GetService<IBingoPointRepo>();
+            var bingoGameService = serviceProvider.GetService<I2DBingoGameService>();
+
+            Assert.True(bingoGameService.JoinGame(PresetBingoGameName, testPlayerId));
+            Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, (0, 0), DateTimeOffset.UtcNow));
+            Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, (1, 0), DateTimeOffset.UtcNow));
+            Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, (2, 0), DateTimeOffset.UtcNow));
+            Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, (3, 0), DateTimeOffset.UtcNow));
+
+            //Act
+            var isSuccessfulLeave = bingoGameService.LeaveGame(PresetBingoGameName, testPlayerId);
+
+            //Assert
+            Assert.True(isSuccessfulLeave);
+
+            var bingoGame = bingoGameInfoRepo.QueryBingoGames().Include(g => g.JoinedPlayers)
+                .FirstOrDefault(g => g.GameName == PresetBingoGameName);
+            Assert.NotNull(bingoGame);
+            Assert.True(bingoGame.JoinedPlayers.All(p => p.PlayerId == testPlayerId));
+
+            Assert.Null(bingoGamePlayerRepo.GetBingoGamePlayer(testPlayerId).FirstOrDefault());
+
+            var ex = Assert.Throws<PlayerNotJoinedGameException>(() =>
+            {
+                bingoPointRepo.QueryBingoPoints(PresetBingoGameName, testPlayerId);
+            });
+
+            Assert.IsType<PlayerNotJoinedGameException>(ex);
+            Assert.Equal(PresetBingoGameName, ex.GameName);
+            Assert.Equal(testPlayerId, ex.PlayerId);
         }
 
         #region Environment Setup
 
-        private void InitConfiguration()
+        private static IConfigurationRoot InitConfiguration()
         {
             using var ms = new MemoryStream(Encoding.UTF8.GetBytes(BingoGameOptionJsonStr));
-            _configuration = new ConfigurationBuilder().AddJsonStream(ms).Build();
+            return new ConfigurationBuilder().AddJsonStream(ms).Build();
         }
 
-        private void InitServices()
+        private ServiceProvider InitServices()
         {
             var serviceCollection = new ServiceCollection();
 
@@ -268,6 +360,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             serviceCollection.AddBingoGameDbContext(builder =>
             {
                 builder.UseSqlite(_connection);
+                builder.EnableSensitiveDataLogging();
                 builder.EnableDetailedErrors();
             });
 
@@ -302,12 +395,12 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             _configuration.GetSection("BingoGame").Bind(bingoGameOption);
             serviceCollection.ConfigPresetBingoGameData(bingoGameOption);
 
-            _serviceProvider = serviceCollection.BuildServiceProvider();
+            return serviceCollection.BuildServiceProvider();
         }
 
         private void PresetData()
         {
-            using var serviceScope = _serviceProvider.CreateScope();
+            using var serviceScope = _rootServiceProvider.CreateScope();
             var serviceProvider = serviceScope.ServiceProvider;
             var dbContext = serviceProvider.GetService<BingoGameDbContext>();
 

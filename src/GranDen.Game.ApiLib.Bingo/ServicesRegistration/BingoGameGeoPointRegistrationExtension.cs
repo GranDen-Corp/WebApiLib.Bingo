@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using GranDen.Game.ApiLib.Bingo.Models;
 using GranDen.Game.ApiLib.Bingo.Repositories.Interfaces;
 using GranDen.Game.ApiLib.Bingo.Services;
 using GranDen.Game.ApiLib.Bingo.Services.Interfaces;
@@ -9,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
 {
     /// <summary>
-    /// Extension method for register Bingo Point assigner
+    /// Extension methods for register Bingo Point assigner
     /// </summary>
     public static class BingoGameGeoPointRegistrationExtension
     {
