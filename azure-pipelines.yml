@@ -14,10 +14,10 @@ parameters:
     type: boolean
     default: false
 variables:
-  sdkVersion: 3.1.x
+  sdkVersion: 6.x
   buildConfiguration: Release
   sourceProject: src/**/*.csproj
-  testNetCoreProject: test/**/*Test.csproj
+  testProject: test/**/*Test.csproj
 stages:
   - stage: Build_stage
     condition: 'and(succeeded(), eq(variables[''Build.Reason''], ''PullRequest''))'
@@ -26,7 +26,7 @@ stages:
       - job: Build
         steps:
           - task: UseDotNet@2
-            displayName: Use .NET 3.1 SDK
+            displayName: Use .NET 6 SDK
             inputs:
               version: $(sdkVersion)
               includePreviewVersions: ${{ parameters.usePreviewSDK }}
@@ -54,7 +54,7 @@ stages:
       - job: Test
         steps:
           - task: UseDotNet@2
-            displayName: Use .NET 3.1 SDK
+            displayName: Use .NET 6 SDK
             inputs:
               version: $(sdkVersion)
               includePreviewVersions: ${{ parameters.usePreviewSDK }}
@@ -62,10 +62,10 @@ stages:
           - task: DotNetCoreCLI@2
             inputs:
               command: test
-              projects: $(testNetCoreProject)
+              projects: $(testProject)
               arguments: '--configuration $(buildConfiguration)  /p:CollectCoverage=true'
               publishTestResults: true
-            displayName: Run NetCore test project
+            displayName: Run test project
           - task: PublishCodeCoverageResults@1
             inputs:
               codeCoverageTool: Cobertura
@@ -87,7 +87,7 @@ stages:
       - job: Publish
         steps:
           - task: UseDotNet@2
-            displayName: Use .NET 3.1 SDK
+            displayName: Use .NET 6 SDK
             inputs:
               version: $(sdkVersion)
               includePreviewVersions: ${{ parameters.usePreviewSDK }}

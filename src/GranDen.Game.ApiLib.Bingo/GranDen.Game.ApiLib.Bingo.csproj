@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
         <Title>Bingo Game Library</Title>
-        <Copyright>Copyright (c) 2020 GranDen Corp.(狂點軟體開發)</Copyright>
+        <Copyright>Copyright (c) 2022 GranDen Corp.(狂點軟體開發)</Copyright>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/GranDen-Corp/WebApiLib.Bingo</PackageProjectUrl>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -31,16 +31,20 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="GranDen.GameLib.Bingo" Version="1.0.7" />
-        <PackageReference Include="GranDen.TimeLib.ClockShaft" Version="1.0.1" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.6" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="3.1.6" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.6" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.6" />
-        <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.6" />
-        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.6" />
-        <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="3.1.6" />
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+        <PackageReference Include="GranDen.GameLib.Bingo" Version="1.1.0" />
+        <PackageReference Include="GranDen.TimeLib.ClockShaft" Version="1.0.2" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.8" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="6.0.8" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.8">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.8" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="6.0.0" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
     </ItemGroup>
 
 </Project>

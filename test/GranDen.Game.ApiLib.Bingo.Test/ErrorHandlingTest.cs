@@ -122,6 +122,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             var endTime = startTime + TimeSpan.FromMinutes(30.0);
 
             //Act
+            Assert.True(bingoGameInfoRepo != null);
             var gameId = bingoGameInfoRepo.CreateBingoGame(
                 new BingoGameInfoDto
                 {
@@ -132,6 +133,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             //Assert
             Assert.NotEqual(0, gameId);
             ClockWork.Reset();
+            Assert.True(bingoGameService != null);
             var ex = Assert.Throws<GameExpiredException>(() =>
             {
                 bingoGameService.JoinGame(bingoGameName, testPlayerId);
@@ -140,6 +142,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             Assert.IsType<GameExpiredException>(ex);
             Assert.Equal(bingoGameName, ex.GameName);
 
+            Assert.True(bingoGamePlayerRepo != null);
             var bingoPlayer = bingoGamePlayerRepo.QueryBingoPlayer().Include(p => p.JoinedGames)
                 .FirstOrDefault(p => p.PlayerId == testPlayerId);
             Assert.Null(bingoPlayer);
@@ -169,6 +172,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             var startTime = ClockWork.DateTimeOffset.UtcNow;
             var endTime = startTime + TimeSpan.FromMinutes(30.0);
 
+            Assert.True(bingoGameInfoRepo != null);
             var gameId = bingoGameInfoRepo.CreateBingoGame(
                 new BingoGameInfoDto
                 {
@@ -178,6 +182,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
 
             Assert.NotEqual(0, gameId);
 
+            Assert.True(bingoGameService != null);
             Assert.True(bingoGameService.JoinGame(bingoGameName, testPlayer1));
             Assert.True(bingoGameService.MarkBingoPoint(bingoGameName, testPlayer1, (0, 0), ClockWork.DateTimeOffset.UtcNow));
             Assert.True(bingoGameService.MarkBingoPoint(bingoGameName, testPlayer1, (0, 1), ClockWork.DateTimeOffset.UtcNow));
