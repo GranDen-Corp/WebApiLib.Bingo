@@ -39,7 +39,7 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
             IEnumerable<string> geoPointIds)
         {
             serviceCollection.AddSingleton<IPresetGeoPointService>(provider =>
-                new PresetGeoPointService {GeoPoints = geoPointIds});
+                new PresetGeoPointService { GeoPoints = geoPointIds });
 
             return serviceCollection;
         }
@@ -54,12 +54,27 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
         public static IServiceProvider InitPresetGeoPointData(this IServiceProvider serviceProvider,
             IEnumerable<string> geoPointIds = null)
         {
-            var mappingGeoPointsRepo = serviceProvider.GetService<IMappingGeoPointsRepo>();
-            var presetGeoPointService = serviceProvider.GetService<IPresetGeoPointService>();
-            if (presetGeoPointService != null)
+            if (serviceProvider == null)
             {
-                var presetGeoPointData = serviceProvider.GetService<IPresetGeoPointService>().GeoPoints;
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
 
+            var mappingGeoPointsRepo = serviceProvider.GetService<IMappingGeoPointsRepo>();
+            if (mappingGeoPointsRepo == null)
+            {
+                throw new Exception("MappingGeoPointsRepo is not registered");
+            }
+
+            var presetGeoPointService = serviceProvider.GetService<IPresetGeoPointService>();
+            if (presetGeoPointService == null)
+            {
+                throw new Exception("PresetGeoPointService is not registered");
+            }
+
+            var presetGeoPointData = serviceProvider.GetService<IPresetGeoPointService>()?.GeoPoints;
+            
+            if(presetGeoPointData != null)
+            {
                 if (!mappingGeoPointsRepo.CreateMappingGeoPoints(presetGeoPointData))
                 {
                     throw new Exception("Preset Bingo Game Db MappingGeoPoint failed.");
@@ -73,7 +88,7 @@ namespace GranDen.Game.ApiLib.Bingo.ServicesRegistration
 
             if (!mappingGeoPointsRepo.CreateMappingGeoPoints(geoPointIds))
             {
-                throw new Exception("Preset Bingo Game Db MappingGeoPoint failed.");
+                throw new Exception("Preset additional Bingo Game Db MappingGeoPoint failed.");
             }
 
             return serviceProvider;

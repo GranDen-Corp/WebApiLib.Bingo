@@ -89,6 +89,8 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             var bingoGamePlayerRepo = serviceProvider.GetService<IBingoGamePlayerRepo>();
 
             //Act
+            Assert.True(bingoGameInfoRepo != null);
+            Assert.True(bingoGameService != null);
             var gameId = bingoGameInfoRepo.CreateBingoGame(
                 new BingoGameInfoDto
                 {
@@ -106,6 +108,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             Assert.NotEqual(0, gameId);
             Assert.True(joined);
 
+            Assert.True(bingoGamePlayerRepo != null);
             var bingoPlayer = bingoGamePlayerRepo.QueryBingoPlayer().Include(p => p.JoinedGames)
                 .FirstOrDefault(p => p.PlayerId == testPlayerId);
             Assert.NotNull(bingoPlayer);
@@ -126,7 +129,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
 
             var bingoGameService = serviceProvider.GetService<I2DBingoGameService>();
 
-            Assert.True(bingoGameService.JoinGame(PresetBingoGameName, testPlayerId));
+            Assert.True(bingoGameService != null && bingoGameService.JoinGame(PresetBingoGameName, testPlayerId));
             Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 1, Y = 2}));
 
             //Act
@@ -156,7 +159,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
             var bingoGameService = serviceProvider.GetService<I2DBingoGameService>();
             var bingoPointRepo = serviceProvider.GetService<IBingoPointRepo>();
 
-            Assert.True(bingoGameService.JoinGame(PresetBingoGameName, testPlayerId));
+            Assert.True(bingoGameService != null && bingoGameService.JoinGame(PresetBingoGameName, testPlayerId));
             Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 0, Y = 0}));
             Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 1, Y = 1}));
             Assert.True(bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 1, Y = 2}));
@@ -188,7 +191,7 @@ namespace GranDen.Game.ApiLib.Bingo.Test
 
             var bingoGameService = serviceProvider.GetService<I2DBingoGameService>();
 
-            Assert.True(bingoGameService.JoinGame(PresetBingoGameName, testPlayerId));
+            Assert.True(bingoGameService != null && bingoGameService.JoinGame(PresetBingoGameName, testPlayerId));
 
             //Act
             var marked0 = bingoGameService.MarkBingoPoint(PresetBingoGameName, testPlayerId, new BingoPointDto {X = 0, Y = 0});

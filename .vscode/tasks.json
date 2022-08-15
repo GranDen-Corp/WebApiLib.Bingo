@@ -32,9 +32,8 @@
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/test/GranDen.Game.ApiLib.Bingo.Test/GranDen.Game.ApiLib.Bingo.Test.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
+                "--project",
+                "${workspaceFolder}/test/GranDen.Game.ApiLib.Bingo.Test/GranDen.Game.ApiLib.Bingo.Test.csproj"
             ],
             "problemMatcher": "$msCompile"
         }
